@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Premier League Fixtures</string>
+    <string name="next_white_fragment">Открыть белый фрагмент</string>
+    <string name="next_black_fragment">Открыть черный фрагмент</string>
 </resources>
