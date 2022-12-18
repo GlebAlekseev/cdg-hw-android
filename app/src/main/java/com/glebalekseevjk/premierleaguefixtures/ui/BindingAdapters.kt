@@ -3,6 +3,7 @@ package com.glebalekseevjk.premierleaguefixtures.ui
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import com.glebalekseevjk.premierleaguefixtures.R
+import com.glebalekseevjk.premierleaguefixtures.utils.parseAndGetDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -29,21 +30,32 @@ fun TextView.teamScore(homeTeamScore: Int, awayTeamScore: Int, isHome: Boolean){
     }
 }
 
+@BindingAdapter(value = ["homeTeamScore","awayTeamScore"], requireAll = true)
+fun TextView.teamScoreInline(homeTeamScore: Int, awayTeamScore: Int){
+    this.text = "$homeTeamScore : $awayTeamScore\nEnd"
+}
+
 @BindingAdapter("hourMinuteAsText")
 fun TextView.hourMinuteAsText(date: String){
-    val parseFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-
-    val localDateTime = LocalDateTime.parse(date.substring(0,date.length-1),parseFormatter)
-    val formatter = DateTimeFormatter.ofPattern("HH:mm")
-    this.text = localDateTime.format(formatter)
+    val resultText = parseAndGetDate(
+        date = date.substring(0,date.length-1),
+        inputPatter = "yyyy-MM-dd HH:mm:ss",
+        outputPatter = "HH:mm"
+    )
+    this.text = resultText
 }
 
 @BindingAdapter("dayMonthYearAsText")
-fun TextView.dayMonthYearAsTextAsText(date: String){
-    val parseFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-
-    val localDateTime = LocalDateTime.parse(date.substring(0,date.length-1), parseFormatter)
-    val formatter = DateTimeFormatter.ofPattern("EEEE,\n dd MMMM uuuu")
-    val resultText = localDateTime.format(formatter)
+fun TextView.dayMonthYearAsText(date: String){
+    val resultText = parseAndGetDate(
+        date = date.substring(0,date.length-1),
+        inputPatter = "yyyy-MM-dd HH:mm:ss",
+        outputPatter = "EEEE, dd MMMM uuuu"
+    )
     this.text = resultText.capitalize()
+}
+
+@BindingAdapter(value = ["matchNumber","roundNumber"], requireAll = true)
+fun TextView.matchAndRoundNumber(matchNumber: Int, roundNumber: Int){
+    this.text = "Match $matchNumber Round $roundNumber"
 }
