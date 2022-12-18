@@ -52,7 +52,17 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
     implementation 'com.google.android.material:material:1.7.0'
 
+//
+//    def paging_version = "3.1.1"
+//    implementation "androidx.paging:paging-runtime:$paging_version"
 
-    def paging_version = "3.1.1"
-    implementation "androidx.paging:paging-runtime:$paging_version"
+    // Coroutine
+    def coroutinesVersion = "1.6.4"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
+
+    // Lifecycle
+    def lifecycle_version = "2.2.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
 }
