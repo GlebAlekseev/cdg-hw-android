@@ -1,4 +1,4 @@
-package com.example.premierleaguefixtures
+package com.glebalekseevjk.premierleaguefixtures
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

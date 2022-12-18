@@ -1,4 +1,4 @@
-package com.example.premierleaguefixtures
+package com.glebalekseevjk.premierleaguefixtures
 
 import org.junit.Test
 

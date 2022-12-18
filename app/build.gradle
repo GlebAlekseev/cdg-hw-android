@@ -1,16 +1,17 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
 }
 
 android {
-    namespace 'com.example.premierleaguefixtures'
-    compileSdk 32
+    namespace 'com.glebalekseevjk.premierleaguefixtures'
+    compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.premierleaguefixtures"
-        minSdk 21
-        targetSdk 32
+        applicationId "com.glebalekseevjk.premierleaguefixtures"
+        minSdk 26
+        targetSdk 33
         versionCode 1
         versionName "1.0"
 
@@ -31,7 +32,7 @@ android {
         jvmTarget = '1.8'
     }
     buildFeatures {
-        viewBinding true
+        dataBinding true
     }
 }
 
@@ -44,4 +45,11 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
+
+    // navigation
+    def nav_version = "2.5.3"
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
+    implementation 'com.google.android.material:material:1.7.0'
+
 }

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/app_navigation"
+    app:startDestination="@id/listMatchesFragment">
+
+    <fragment
+        android:id="@+id/listMatchesFragment"
+        android:name="com.glebalekseevjk.premierleaguefixtures.ui.fragment.ListMatchesFragment"
+        android:label="ListMatchesFragment" >
+        <action
+            android:id="@+id/action_listMatchesFragment_to_matchDetailFragment"
+            app:destination="@id/matchDetailFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/listMatchesFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/matchDetailFragment"
+        android:name="com.glebalekseevjk.premierleaguefixtures.ui.fragment.MatchDetailFragment"
+        android:label="MatchDetailFragment" />
+</navigation>
