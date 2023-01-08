@@ -20,5 +20,9 @@
     <fragment
         android:id="@+id/matchDetailFragment"
         android:name="com.glebalekseevjk.premierleaguefixtures.ui.fragment.MatchDetailFragment"
-        android:label="MatchDetailFragment" />
+        android:label="MatchDetailFragment" >
+        <argument
+            android:name="match_number"
+            app:argType="integer" />
+    </fragment>
 </navigation>

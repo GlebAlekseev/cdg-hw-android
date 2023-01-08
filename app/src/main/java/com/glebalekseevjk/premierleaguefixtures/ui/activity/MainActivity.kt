@@ -14,27 +14,9 @@ import com.glebalekseevjk.premierleaguefixtures.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding;
-    private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        setSupportActionBar(binding.toolbar)
-        val navHostFragment =
-            supportFragmentManager.findFragmentById(R.id.main_fcv) as NavHostFragment
-        navController = navHostFragment.navController
-        val onDestinationChangedListener = NavController.OnDestinationChangedListener { controller, destination, arguments ->
-            title = when (destination.id) {
-                R.id.listMatchesFragment -> resources.getString(R.string.app_name)
-                R.id.matchDetailFragment -> "PLF Match"
-                else -> ""
-            }
-            controller.currentDestination?.label = title
-        }
-        navController.addOnDestinationChangedListener(onDestinationChangedListener)
-
-        val appBarConfiguration = AppBarConfiguration(navController.graph)
-
-        binding.toolbar.setupWithNavController(navController, appBarConfiguration)
     }
 }

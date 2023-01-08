@@ -4,6 +4,7 @@ import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import com.glebalekseevjk.premierleaguefixtures.R
 import com.glebalekseevjk.premierleaguefixtures.utils.parseAndGetDate
+import com.google.android.material.appbar.MaterialToolbar
 
 @BindingAdapter(value = ["homeTeamScore","awayTeamScore","isHome"], requireAll = true)
 fun TextView.teamScore(homeTeamScore: Int, awayTeamScore: Int, isHome: Boolean){
@@ -56,4 +57,9 @@ fun TextView.dayMonthYearAsText(date: String){
 @BindingAdapter(value = ["matchNumber","roundNumber"], requireAll = true)
 fun TextView.matchAndRoundNumber(matchNumber: Int, roundNumber: Int){
     this.text = "Match $matchNumber Round $roundNumber"
+}
+
+@BindingAdapter(value = ["matchNumber","roundNumber"], requireAll = true)
+fun MaterialToolbar.matchAndRoundNumber(matchNumber: Int, roundNumber: Int){
+    this.title = "Match $matchNumber Round $roundNumber"
 }

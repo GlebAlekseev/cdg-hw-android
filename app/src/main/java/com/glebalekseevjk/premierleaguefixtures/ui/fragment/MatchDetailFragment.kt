@@ -4,12 +4,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedDispatcher
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupWithNavController
 import com.glebalekseevjk.premierleaguefixtures.databinding.FragmentMatchDetailBinding
 import com.glebalekseevjk.premierleaguefixtures.domain.entity.MatchInfo
 import com.glebalekseevjk.premierleaguefixtures.ui.activity.MainActivity
+import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.ListMatchesViewModel
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.MatchDetailViewModel
 import kotlinx.coroutines.launch
 
@@ -18,22 +25,14 @@ class MatchDetailFragment : Fragment() {
     private val binding: FragmentMatchDetailBinding
         get() = _binding ?: throw RuntimeException("FragmentMatchDetailBinding is null")
 
+    private val args: MatchDetailFragmentArgs by navArgs()
+
     private val matchDetailViewModel: MatchDetailViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (savedInstanceState == null) {
+        if (savedInstanceState == null){
             parseParams()
-        }
-    }
-
-    private fun observeCurrentMatchInfo(){
-        lifecycleScope.launch{
-            matchDetailViewModel.observeCurrentMatchList().collect{
-                val match = it.firstOrNull() ?: throw RuntimeException("Match with current number is not exist")
-                binding.match = match
-                (activity as MainActivity).supportActionBar?.title = "PLF Match ${match.matchNumber} Round ${match.roundNumber}"
-            }
         }
     }
 
@@ -47,8 +46,8 @@ class MatchDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.match = MatchInfo.MOCK
-        observeCurrentMatchInfo()
+        binding.matchDetailViewModel = matchDetailViewModel
+        initToolBar()
     }
     override fun onDestroyView() {
         super.onDestroyView()
@@ -56,13 +55,12 @@ class MatchDetailFragment : Fragment() {
     }
 
     private fun parseParams() {
-        val args = requireArguments()
-        println(args.toString())
-        if (!args.containsKey(MATCH_NUMBER)) throw RuntimeException("Param match number is absent")
-        matchDetailViewModel.currentMatchNumber.value = args.getInt(MATCH_NUMBER)
+        matchDetailViewModel.setCurrentMatchInfo(args.matchNumber)
     }
 
-    companion object {
-        const val MATCH_NUMBER = "match_number"
+    private fun initToolBar(){
+        binding.toolbar.setNavigationOnClickListener {
+            activity?.onBackPressed()
+        }
     }
 }
