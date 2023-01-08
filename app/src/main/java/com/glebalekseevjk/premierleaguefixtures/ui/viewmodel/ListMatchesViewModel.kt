@@ -1,21 +1,58 @@
 package com.glebalekseevjk.premierleaguefixtures.ui.viewmodel
 
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import com.glebalekseevjk.premierleaguefixtures.data.repository.MatchInfoRepositoryImpl
 import com.glebalekseevjk.premierleaguefixtures.domain.interactor.MatchInfoUseCase
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.ListMatchesState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 
-class ListMatchesViewModel: ViewModel() {
+class ListMatchesViewModel : BaseViewModel<ListMatchesState>(ListMatchesState()) {
     private val matchInfoRepository = MatchInfoRepositoryImpl()
     private val matchInfoUseCase = MatchInfoUseCase(matchInfoRepository)
 
-    fun observeMatchList() = matchInfoUseCase.getMatchList()
-    val currentRecyclerLayoutManager = MutableStateFlow(LayoutManagerViewType.VIEW_TYPE_LIST)
+    init {
+        subscribeOnDataSource(
+            matchInfoUseCase.getPaginationMatchList().asLiveData()
+        ) { response, state ->
+            state.copy(
+                listMatches = response
+            )
+        }
+    }
 
-    companion object {
-        enum class LayoutManagerViewType{
-            VIEW_TYPE_GRID,
-            VIEW_TYPE_LIST
+    suspend fun loadNextPage() {
+        if (currentState.isLastPage) return
+        if (!currentState.isLoading) {
+            updateState {
+                it.copy(
+                    isLoading = true
+                )
+            }
+        }
+        val newPage = currentState.currentPage + 1
+        updateState {
+            it.copy(
+                currentPage = newPage
+            )
+        }
+
+        delay(600)
+        val isLast = with(Dispatchers.IO){
+            matchInfoUseCase.addMatchListForPage(newPage) {
+                updateState {
+                    it.copy(
+                        isLoading = false
+                    )
+                }
+            }
+        }
+
+        updateState {
+            it.copy(
+                isLoading = !isLast,
+                isLastPage = isLast
+            )
         }
     }
 }

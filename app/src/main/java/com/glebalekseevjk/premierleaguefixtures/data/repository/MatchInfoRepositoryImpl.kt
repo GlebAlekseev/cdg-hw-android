@@ -4,22 +4,38 @@ import com.glebalekseevjk.premierleaguefixtures.domain.entity.MatchInfo
 import com.glebalekseevjk.premierleaguefixtures.domain.repository.MatchInfoRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.runBlocking
 
 class MatchInfoRepositoryImpl: MatchInfoRepository {
-    private val _mockList: MutableStateFlow<List<MatchInfo>> = MutableStateFlow(MatchInfoRepositoryImpl.mockList)
+    private val _mockList: MutableStateFlow<List<MatchInfo>> = MutableStateFlow(emptyList())
     val mockList: StateFlow<List<MatchInfo>>
         get() = _mockList
 
-    override fun getMatchList(): Flow<List<MatchInfo>> = mockList
+    override fun getPaginationMatchList(): Flow<List<MatchInfo>> = mockList
 
-    override fun getMatch(matchNumber: Int): Flow<List<MatchInfo>> = flow<List<MatchInfo>> {
-        mockList.collect{ list ->
-            val result = list.firstOrNull { it.matchNumber == matchNumber }
-            if (result == null) emit(emptyList()) else emit(listOf(result))
+    // Вернет true, если последняя страница
+    override suspend fun addMatchListForPage(page: Int, callback: () -> Unit): Boolean {
+        val start = TOTAL_PER_PAGE * page - TOTAL_PER_PAGE
+        var end = TOTAL_PER_PAGE * page - 1
+        val isLast = MatchInfoRepositoryImpl.mockList.size - 1 <= end
+        if (end >= MatchInfoRepositoryImpl.mockList.size)  end = MatchInfoRepositoryImpl.mockList.size - 1
+        try {
+            val list = MatchInfoRepositoryImpl.mockList.subList(start, end + 1)
+            callback.invoke()
+            _mockList.emit(_mockList.value + list)
+        }catch (err: Exception){
+            return true
         }
+        return isLast
+    }
+
+    override fun getMatch(matchNumber: Int): Flow<MatchInfo> = flow {
+        val matchInfo = MatchInfoRepositoryImpl.mockList.firstOrNull { it.matchNumber == matchNumber } ?: throw RuntimeException("There is no match with this number")
+        emit(matchInfo)
     }.flowOn(Dispatchers.IO)
 
     companion object {
+        private const val TOTAL_PER_PAGE = 8
         val mockList: List<MatchInfo> = listOf(
             MatchInfo(
                 1,
@@ -298,6 +314,204 @@ class MatchInfoRepositoryImpl: MatchInfoRepository {
             ),
             MatchInfo(
                 26,
+                1,
+                "2021-08-18 14:00:00Z",
+                "Stamford Bridge",
+                "Chelsea",
+                "Crystal Palace",
+                null,
+                3,
+                0
+            ),
+            MatchInfo(
+                27,
+                1,
+                "2021-08-18 14:00:00Z",
+                "Stamford Bridge",
+                "Chelsea",
+                "Crystal Palace",
+                null,
+                3,
+                0
+            ),
+            MatchInfo(
+                28,
+                1,
+                "2021-08-18 14:00:00Z",
+                "Stamford Bridge",
+                "Chelsea",
+                "Crystal Palace",
+                null,
+                3,
+                0
+            ),
+            MatchInfo(
+                29,
+                1,
+                "2021-08-18 14:00:00Z",
+                "Stamford Bridge",
+                "Chelsea",
+                "Crystal Palace",
+                null,
+                3,
+                0
+            ),
+            MatchInfo(
+                30,
+                1,
+                "2021-08-18 14:00:00Z",
+                "Stamford Bridge",
+                "Chelsea",
+                "Crystal Palace",
+                null,
+                3,
+                0
+            ),
+            MatchInfo(
+                31,
+                1,
+                "2021-08-18 14:00:00Z",
+                "Stamford Bridge",
+                "Chelsea",
+                "Crystal Palace",
+                null,
+                3,
+                0
+            ),
+            MatchInfo(
+                32,
+                1,
+                "2021-08-18 14:00:00Z",
+                "Stamford Bridge",
+                "Chelsea",
+                "Crystal Palace",
+                null,
+                3,
+                0
+            ),
+            MatchInfo(
+                33,
+                1,
+                "2021-08-18 14:00:00Z",
+                "Stamford Bridge",
+                "Chelsea",
+                "Crystal Palace",
+                null,
+                3,
+                0
+            ),
+            MatchInfo(
+                34,
+                1,
+                "2021-08-18 14:00:00Z",
+                "Stamford Bridge",
+                "Chelsea",
+                "Crystal Palace",
+                null,
+                3,
+                0
+            ),
+            MatchInfo(
+                35,
+                1,
+                "2021-08-18 14:00:00Z",
+                "Stamford Bridge",
+                "Chelsea",
+                "Crystal Palace",
+                null,
+                3,
+                0
+            ),
+            MatchInfo(
+                36,
+                1,
+                "2021-08-18 14:00:00Z",
+                "Stamford Bridge",
+                "Chelsea",
+                "Crystal Palace",
+                null,
+                3,
+                0
+            ),
+            MatchInfo(
+                37,
+                1,
+                "2021-08-18 14:00:00Z",
+                "Stamford Bridge",
+                "Chelsea",
+                "Crystal Palace",
+                null,
+                3,
+                0
+            ),
+            MatchInfo(
+                38,
+                1,
+                "2021-08-18 14:00:00Z",
+                "Stamford Bridge",
+                "Chelsea",
+                "Crystal Palace",
+                null,
+                3,
+                0
+            ),
+            MatchInfo(
+                39,
+                1,
+                "2021-08-18 14:00:00Z",
+                "Stamford Bridge",
+                "Chelsea",
+                "Crystal Palace",
+                null,
+                3,
+                0
+            ),
+            MatchInfo(
+                40,
+                1,
+                "2021-08-18 14:00:00Z",
+                "Stamford Bridge",
+                "Chelsea",
+                "Crystal Palace",
+                null,
+                3,
+                0
+            ),
+            MatchInfo(
+                41,
+                1,
+                "2021-08-18 14:00:00Z",
+                "Stamford Bridge",
+                "Chelsea",
+                "Crystal Palace",
+                null,
+                3,
+                0
+            ),
+            MatchInfo(
+                42,
+                1,
+                "2021-08-18 14:00:00Z",
+                "Stamford Bridge",
+                "Chelsea",
+                "Crystal Palace",
+                null,
+                3,
+                0
+            ),
+            MatchInfo(
+                43,
+                1,
+                "2021-08-18 14:00:00Z",
+                "Stamford Bridge",
+                "Chelsea",
+                "Crystal Palace",
+                null,
+                3,
+                0
+            ),
+            MatchInfo(
+                44,
                 1,
                 "2021-08-18 14:00:00Z",
                 "Stamford Bridge",

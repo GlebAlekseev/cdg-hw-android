@@ -4,6 +4,7 @@ import com.glebalekseevjk.premierleaguefixtures.domain.entity.MatchInfo
 import kotlinx.coroutines.flow.Flow
 
 interface MatchInfoRepository {
-    fun getMatchList(): Flow<List<MatchInfo>>
-    fun getMatch(matchNumber: Int): Flow<List<MatchInfo>>
+    fun getPaginationMatchList(): Flow<List<MatchInfo>>
+    suspend fun addMatchListForPage(page: Int, callback: ()->Unit): Boolean
+    fun getMatch(matchNumber: Int): Flow<MatchInfo>
 }
