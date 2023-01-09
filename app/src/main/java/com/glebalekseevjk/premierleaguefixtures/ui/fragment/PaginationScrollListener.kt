@@ -5,6 +5,8 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 abstract class PaginationScrollListener(private val layoutManager: GridLayoutManager): RecyclerView.OnScrollListener() {
     private var lock = false
@@ -21,14 +23,15 @@ abstract class PaginationScrollListener(private val layoutManager: GridLayoutMan
             ) {
                 CoroutineScope(Dispatchers.Main).launch {
                     lock = true
-                    loadMoreItems()
-                    lock = false
+                    loadMoreItems{
+                        lock = false
+                    }
                 }
             }
         }
     }
 
-    protected abstract suspend fun loadMoreItems()
+    protected abstract suspend fun loadMoreItems(onFinishCallback: ()->Unit)
 
     protected abstract fun isLastPage(): Boolean
 

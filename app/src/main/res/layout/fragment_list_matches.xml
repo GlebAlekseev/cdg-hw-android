@@ -25,12 +25,23 @@
                 />
         </com.google.android.material.appbar.AppBarLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/match_list_rv"
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/match_info_list_up_srl"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
-            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-            tools:listitem="@layout/match_item_rv_list" />
+            android:layout_width="match_parent">
+            <androidx.core.widget.NestedScrollView
+                android:layout_height="match_parent"
+                android:layout_width="match_parent">
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/match_list_rv"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                    tools:listitem="@layout/match_item_rv_list" />
+            </androidx.core.widget.NestedScrollView>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

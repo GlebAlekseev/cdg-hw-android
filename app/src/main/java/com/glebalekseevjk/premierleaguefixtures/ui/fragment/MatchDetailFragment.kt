@@ -8,12 +8,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedDispatcher
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
+import com.glebalekseevjk.premierleaguefixtures.MainApplication
 import com.glebalekseevjk.premierleaguefixtures.databinding.FragmentMatchDetailBinding
 import com.glebalekseevjk.premierleaguefixtures.domain.entity.MatchInfo
 import com.glebalekseevjk.premierleaguefixtures.ui.activity.MainActivity
@@ -29,7 +31,13 @@ class MatchDetailFragment : Fragment() {
         get() = _binding ?: throw RuntimeException("FragmentMatchDetailBinding is null")
     private val navController: NavController by lazy { findNavController() }
     private val args: MatchDetailFragmentArgs by navArgs()
-    private val matchDetailViewModel: MatchDetailViewModel by viewModels()
+    private val matchDetailViewModel by lazy {
+        ViewModelProvider(
+            this,
+            (requireContext().applicationContext as MainApplication).matchDetailViewModelFactory
+        )[MatchDetailViewModel::class.java]
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (savedInstanceState == null) parseParams()

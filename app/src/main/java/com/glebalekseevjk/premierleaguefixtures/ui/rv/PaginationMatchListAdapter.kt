@@ -76,6 +76,8 @@ class PaginationMatchListAdapter: ListAdapter<MatchInfo, PaginationMatchListAdap
         const val VIEW_TYPE_GRID = 2
         const val VIEW_TYPE_LIST = 1
         const val VIEW_TYPE_LOADING = 0
+
+        const val LOADING_POOL_SIZE = 1
     }
 }
 

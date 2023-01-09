@@ -7,7 +7,7 @@ data class ListMatchesState(
     val listMatches: List<MatchInfo> = emptyList(),
     val isLastPage: Boolean = false,
     val isLoading: Boolean = true,
-    val currentPage: Int = 0
+    val currentPage: Int = 0,
 ){
     companion object{
         enum class LayoutManagerViewType{

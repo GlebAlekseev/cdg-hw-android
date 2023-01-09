@@ -2,17 +2,21 @@ package com.glebalekseevjk.premierleaguefixtures.ui.fragment
 
 import android.os.Bundle
 import android.transition.TransitionManager
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.glebalekseevjk.premierleaguefixtures.MainApplication
 import com.glebalekseevjk.premierleaguefixtures.R
 import com.glebalekseevjk.premierleaguefixtures.databinding.FragmentListMatchesBinding
 import com.glebalekseevjk.premierleaguefixtures.ui.rv.MatchListAdapter
@@ -24,6 +28,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 
 
 class ListMatchesFragment : Fragment() {
@@ -31,8 +36,13 @@ class ListMatchesFragment : Fragment() {
     private val binding: FragmentListMatchesBinding
         get() = _binding ?: throw RuntimeException("FragmentListMatchesBinding is null")
 
+    private val listMatchesViewModel by lazy {
+        ViewModelProvider(
+            this,
+            (requireContext().applicationContext as MainApplication).listMatchesViewModelFactory
+        )[ListMatchesViewModel::class.java]
+    }
     private lateinit var matchListAdapter: PaginationMatchListAdapter
-    private val listMatchesViewModel: ListMatchesViewModel by viewModels()
     private val navController: NavController by lazy { findNavController() }
 
     override fun onCreateView(
@@ -49,11 +59,13 @@ class ListMatchesFragment : Fragment() {
         setupToolbar()
         observeSubmitListAdapter()
         setupRecyclerView()
+        initListeners()
         if (savedInstanceState == null){
             CoroutineScope(Dispatchers.Main).launch {
                 delay(100)
                 startPostponedEnterTransition()
-                listMatchesViewModel.loadNextPage()
+                binding.matchListRv.onScrolled(0,0)
+
             }
         }else{
             startPostponedEnterTransition()
@@ -79,13 +91,17 @@ class ListMatchesFragment : Fragment() {
                 VIEW_TYPE_LIST -> 1
             }
         }
+        binding.matchListRv.recycledViewPool.setMaxRecycledViews(PaginationMatchListAdapter.VIEW_TYPE_LOADING, PaginationMatchListAdapter.LOADING_POOL_SIZE)
         matchListAdapter.openMatchDetailClickListener = { matchNumber ->
             navigateToMatchDetailFragment(matchNumber)
         }
         val paginationScrollListener = object :
             PaginationScrollListener(binding.matchListRv.layoutManager as GridLayoutManager) {
-            override suspend fun loadMoreItems() {
-                listMatchesViewModel.loadNextPage()
+            override suspend fun loadMoreItems(onFinishCallback: () -> Unit) {
+                listMatchesViewModel.loadNextPage(onFinishCallback) {
+                    Log.d("ListMatchesFragment", it)
+                    Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                }
             }
 
             override fun isLastPage(): Boolean {
@@ -104,6 +120,17 @@ class ListMatchesFragment : Fragment() {
         val action =
             ListMatchesFragmentDirections.actionListMatchesFragmentToMatchDetailFragment(matchNumber)
         navController.navigate(action)
+    }
+
+    private fun initListeners(){
+        binding.matchInfoListUpSrl.setOnRefreshListener {
+            lifecycleScope.launch{
+                listMatchesViewModel.resetPaginationListHolder {
+                    binding.matchListRv.onScrolled(0,0)
+                    binding.matchInfoListUpSrl.isRefreshing = false
+                }
+            }
+        }
     }
 
     private fun observeSubmitListAdapter() {

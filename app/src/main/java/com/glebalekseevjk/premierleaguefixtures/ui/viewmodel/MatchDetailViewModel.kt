@@ -1,20 +1,21 @@
 package com.glebalekseevjk.premierleaguefixtures.ui.viewmodel
 
 import androidx.lifecycle.asLiveData
+import com.glebalekseevjk.premierleaguefixtures.data.remote.RetrofitClient
 import com.glebalekseevjk.premierleaguefixtures.data.repository.MatchInfoRepositoryImpl
 import com.glebalekseevjk.premierleaguefixtures.domain.interactor.MatchInfoUseCase
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.MatchDetailState
 
-class MatchDetailViewModel : BaseViewModel<MatchDetailState>(MatchDetailState()) {
-    private val matchInfoRepository = MatchInfoRepositoryImpl()
-    private val matchInfoUseCase = MatchInfoUseCase(matchInfoRepository)
+class MatchDetailViewModel(
+    private val matchInfoUseCase: MatchInfoUseCase
+) : BaseViewModel<MatchDetailState>(MatchDetailState()) {
 
     fun setCurrentMatchInfo(matchNumber: Int) {
         subscribeOnDataSource(
             matchInfoUseCase.getMatch(matchNumber).asLiveData()
         ) { response, state ->
             state.copy(
-                matchInfo = response
+                matchInfo = response ?: throw RuntimeException("Attempt to get a non-existent element")
             )
         }
     }
