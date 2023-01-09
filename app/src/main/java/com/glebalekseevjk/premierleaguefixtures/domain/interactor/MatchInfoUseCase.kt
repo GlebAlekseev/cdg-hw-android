@@ -4,5 +4,5 @@ import com.glebalekseevjk.premierleaguefixtures.domain.repository.MatchInfoRepos
 
 class MatchInfoUseCase(private val matchInfoRepository: MatchInfoRepository) {
     fun getMatch(matchNumber: Int) = matchInfoRepository.getMatch(matchNumber)
-    fun getMatchList() = matchInfoRepository.getMatchList()
+    fun getMatchListRangeForPage(page: Int) = matchInfoRepository.getMatchListRangeForPage(page)
 }
