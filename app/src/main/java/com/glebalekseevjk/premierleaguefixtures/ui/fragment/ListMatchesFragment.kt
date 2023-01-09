@@ -1,7 +1,6 @@
 package com.glebalekseevjk.premierleaguefixtures.ui.fragment
 
 import android.os.Bundle
-import android.transition.TransitionManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -102,6 +101,10 @@ class ListMatchesFragment : Fragment() {
                     }
                     true
                 }
+                R.id.menu_search -> {
+                    // TODO()
+                    true
+                }
                 else -> false
             }
         }
@@ -115,33 +118,27 @@ class ListMatchesFragment : Fragment() {
                     VIEW_TYPE_GRID -> {
                         if (matchListAdapter.viewType != MatchListAdapter.VIEW_TYPE_GRID) {
                             binding.matchListRv.post {
-                                TransitionManager.beginDelayedTransition(binding.matchListRv)
                                 (binding.matchListRv.layoutManager as GridLayoutManager).spanCount =
                                     2
-                            }
-                            binding.matchListRv.postDelayed({
                                 matchListAdapter.viewType = MatchListAdapter.VIEW_TYPE_GRID
                                 refreshVisibleRecyclerViewItems(
                                     matchListAdapter,
                                     binding.matchListRv
                                 )
-                            }, 100)
+                            }
                         }
                     }
                     VIEW_TYPE_LIST -> {
                         if (matchListAdapter.viewType != MatchListAdapter.VIEW_TYPE_LIST) {
                             binding.matchListRv.post {
-                                TransitionManager.beginDelayedTransition(binding.matchListRv)
                                 (binding.matchListRv.layoutManager as GridLayoutManager).spanCount =
                                     1
-                            }
-                            binding.matchListRv.postDelayed({
                                 matchListAdapter.viewType = MatchListAdapter.VIEW_TYPE_LIST
                                 refreshVisibleRecyclerViewItems(
                                     matchListAdapter,
                                     binding.matchListRv
                                 )
-                            }, 100)
+                            }
                         }
                     }
                 }

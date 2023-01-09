@@ -31,4 +31,16 @@
         <item name="cornerSizeBottomRight">0dp</item>
         <item name="cornerSizeBottomLeft">@dimen/corner_radius_small</item>
     </style>
+
+    <style name="CustomSearchViewStyle" parent="Widget.AppCompat.SearchView">
+        <item name="searchHintIcon">@null</item>
+        <item name="closeIconTint">?attr/colorOnPrimary</item>
+        <item name="queryHint">@string/team_name_text</item>
+        <item name="closeIcon">@drawable/ic_cross_24</item>
+    </style>
+
+    <style name="SearchAutoCompleteTextView" parent="Widget.AppCompat.Light.AutoCompleteTextView">
+        <item name="android:textColor">?attr/colorOnPrimary</item>
+        <item name="android:textColorHint">?attr/colorOnPrimary</item>
+    </style>
 </resources>

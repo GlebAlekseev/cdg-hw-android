@@ -9,5 +9,7 @@
         <item name="android:textAppearance">@style/Base.TextAppearance</item>
         <item name="android:statusBarColor">?attr/colorPrimary</item>
         <item name="android:windowBackground">?attr/colorPrimary</item>
+        <item name="searchViewStyle">@style/CustomSearchViewStyle</item>
+        <item name="autoCompleteTextViewStyle">@style/SearchAutoCompleteTextView</item>
     </style>
 </resources>
