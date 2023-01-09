@@ -16,8 +16,9 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import retrofit2.Response
+import javax.inject.Inject
 
-class MatchInfoRepositoryImpl(
+class MatchInfoRepositoryImpl @Inject constructor(
     private val matchInfoService: MatchInfoService,
     private val matchInfoDao: MatchInfoDao,
     private val mapper: Mapper<MatchInfo, MatchInfoDbModel>

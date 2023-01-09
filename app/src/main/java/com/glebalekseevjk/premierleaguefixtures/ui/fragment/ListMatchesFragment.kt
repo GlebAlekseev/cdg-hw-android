@@ -1,5 +1,6 @@
 package com.glebalekseevjk.premierleaguefixtures.ui.fragment
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -14,10 +15,9 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.glebalekseevjk.premierleaguefixtures.MainApplication
 import com.glebalekseevjk.premierleaguefixtures.R
+import com.glebalekseevjk.premierleaguefixtures.appComponent
 import com.glebalekseevjk.premierleaguefixtures.databinding.FragmentListMatchesBinding
-import com.glebalekseevjk.premierleaguefixtures.ui.rv.MatchListAdapter
 import com.glebalekseevjk.premierleaguefixtures.ui.rv.PaginationMatchListAdapter
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.ListMatchesViewModel
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.ListMatchesState.Companion.LayoutManagerViewType.VIEW_TYPE_GRID
@@ -26,6 +26,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
 class ListMatchesFragment : Fragment() {
@@ -33,14 +34,23 @@ class ListMatchesFragment : Fragment() {
     private val binding: FragmentListMatchesBinding
         get() = _binding ?: throw RuntimeException("FragmentListMatchesBinding is null")
 
-    private val listMatchesViewModel by lazy {
-        ViewModelProvider(
-            this,
-            (requireContext().applicationContext as MainApplication).listMatchesViewModelFactory
-        )[ListMatchesViewModel::class.java]
-    }
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+    private lateinit var listMatchesViewModel: ListMatchesViewModel
+
     private lateinit var matchListAdapter: PaginationMatchListAdapter
     private val navController: NavController by lazy { findNavController() }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        context.appComponent.createListMatchesFragmentSubcomponent().inject(this)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        listMatchesViewModel =
+            ViewModelProvider(this, viewModelFactory)[ListMatchesViewModel::class.java]
+        super.onCreate(savedInstanceState)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -116,11 +126,12 @@ class ListMatchesFragment : Fragment() {
                 matchListAdapter.submitList(it.listMatches)
                 when (it.layoutManagerViewType) {
                     VIEW_TYPE_GRID -> {
-                        if (matchListAdapter.viewType != MatchListAdapter.VIEW_TYPE_GRID) {
+                        if (matchListAdapter.viewType != PaginationMatchListAdapter.VIEW_TYPE_GRID) {
                             binding.matchListRv.post {
                                 (binding.matchListRv.layoutManager as GridLayoutManager).spanCount =
                                     2
-                                matchListAdapter.viewType = MatchListAdapter.VIEW_TYPE_GRID
+                                matchListAdapter.viewType =
+                                    PaginationMatchListAdapter.VIEW_TYPE_GRID
                                 refreshVisibleRecyclerViewItems(
                                     matchListAdapter,
                                     binding.matchListRv
@@ -129,11 +140,12 @@ class ListMatchesFragment : Fragment() {
                         }
                     }
                     VIEW_TYPE_LIST -> {
-                        if (matchListAdapter.viewType != MatchListAdapter.VIEW_TYPE_LIST) {
+                        if (matchListAdapter.viewType != PaginationMatchListAdapter.VIEW_TYPE_LIST) {
                             binding.matchListRv.post {
                                 (binding.matchListRv.layoutManager as GridLayoutManager).spanCount =
                                     1
-                                matchListAdapter.viewType = MatchListAdapter.VIEW_TYPE_LIST
+                                matchListAdapter.viewType =
+                                    PaginationMatchListAdapter.VIEW_TYPE_LIST
                                 refreshVisibleRecyclerViewItems(
                                     matchListAdapter,
                                     binding.matchListRv

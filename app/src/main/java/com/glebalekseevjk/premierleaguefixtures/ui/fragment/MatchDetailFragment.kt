@@ -1,5 +1,6 @@
 package com.glebalekseevjk.premierleaguefixtures.ui.fragment
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,27 +11,33 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.glebalekseevjk.premierleaguefixtures.MainApplication
+import com.glebalekseevjk.premierleaguefixtures.appComponent
 import com.glebalekseevjk.premierleaguefixtures.databinding.FragmentMatchDetailBinding
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.MatchDetailViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 class MatchDetailFragment : Fragment() {
     private var _binding: FragmentMatchDetailBinding? = null
     private val binding: FragmentMatchDetailBinding
         get() = _binding ?: throw RuntimeException("FragmentMatchDetailBinding is null")
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+    private lateinit var matchDetailViewModel: MatchDetailViewModel
+
     private val navController: NavController by lazy { findNavController() }
     private val args: MatchDetailFragmentArgs by navArgs()
-    private val matchDetailViewModel by lazy {
-        ViewModelProvider(
-            this,
-            (requireContext().applicationContext as MainApplication).matchDetailViewModelFactory
-        )[MatchDetailViewModel::class.java]
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        context.appComponent.createMatchDetailFragmentSubcomponent().inject(this)
     }
-
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
+        matchDetailViewModel =
+            ViewModelProvider(this, viewModelFactory)[MatchDetailViewModel::class.java]
         if (savedInstanceState == null) parseParams()
         super.onCreate(savedInstanceState)
     }
