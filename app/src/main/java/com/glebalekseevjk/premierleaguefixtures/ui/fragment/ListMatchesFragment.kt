@@ -15,6 +15,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.Transition
 import com.glebalekseevjk.premierleaguefixtures.MainApplication
 import com.glebalekseevjk.premierleaguefixtures.R
 import com.glebalekseevjk.premierleaguefixtures.databinding.FragmentListMatchesBinding
@@ -115,33 +116,27 @@ class ListMatchesFragment : Fragment() {
                     VIEW_TYPE_GRID -> {
                         if (matchListAdapter.viewType != MatchListAdapter.VIEW_TYPE_GRID) {
                             binding.matchListRv.post {
-                                TransitionManager.beginDelayedTransition(binding.matchListRv)
                                 (binding.matchListRv.layoutManager as GridLayoutManager).spanCount =
                                     2
-                            }
-                            binding.matchListRv.postDelayed({
                                 matchListAdapter.viewType = MatchListAdapter.VIEW_TYPE_GRID
                                 refreshVisibleRecyclerViewItems(
                                     matchListAdapter,
                                     binding.matchListRv
                                 )
-                            }, 100)
+                            }
                         }
                     }
                     VIEW_TYPE_LIST -> {
                         if (matchListAdapter.viewType != MatchListAdapter.VIEW_TYPE_LIST) {
                             binding.matchListRv.post {
-                                TransitionManager.beginDelayedTransition(binding.matchListRv)
                                 (binding.matchListRv.layoutManager as GridLayoutManager).spanCount =
                                     1
-                            }
-                            binding.matchListRv.postDelayed({
                                 matchListAdapter.viewType = MatchListAdapter.VIEW_TYPE_LIST
                                 refreshVisibleRecyclerViewItems(
                                     matchListAdapter,
                                     binding.matchListRv
                                 )
-                            }, 100)
+                            }
                         }
                     }
                 }
