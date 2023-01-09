@@ -1,41 +1,27 @@
 package com.glebalekseevjk.premierleaguefixtures
 
 import android.app.Application
-import com.glebalekseevjk.premierleaguefixtures.data.local.AppDatabase
-import com.glebalekseevjk.premierleaguefixtures.data.mapper.MatchInfoMapperImpl
-import com.glebalekseevjk.premierleaguefixtures.data.remote.RetrofitClient
-import com.glebalekseevjk.premierleaguefixtures.data.repository.MatchInfoRepositoryImpl
-import com.glebalekseevjk.premierleaguefixtures.domain.interactor.MatchInfoUseCase
-import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.ListMatchesViewModelFactory
-import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.MatchDetailViewModelFactory
+import android.content.Context
+import com.glebalekseevjk.premierleaguefixtures.di.AppComponent
+import com.glebalekseevjk.premierleaguefixtures.di.DaggerAppComponent
 
 class MainApplication : Application() {
-    private val appDatabase by lazy {
-        AppDatabase.getDataBase(this)
-    }
-    private val matchInfoMapperImpl by lazy {
-        MatchInfoMapperImpl()
-    }
-    private val matchInfoRepositoryImpl by lazy {
-        MatchInfoRepositoryImpl(
-            RetrofitClient.matchInfoApi,
-            appDatabase.matchInfoDao(),
-            matchInfoMapperImpl
-        )
-    }
-    val listMatchesViewModelFactory by lazy {
-        ListMatchesViewModelFactory(
-            MatchInfoUseCase(
-                matchInfoRepositoryImpl
-            )
-        )
-    }
-    val matchDetailViewModelFactory by lazy {
-        MatchDetailViewModelFactory(
-            MatchInfoUseCase(
-                matchInfoRepositoryImpl
-            )
-        )
+    val appComponent: AppComponent by lazy {
+        DaggerAppComponent.factory().create(this)
     }
 
+    override fun onCreate() {
+        super.onCreate()
+        appComponent.injectMainApplication(this)
+    }
 }
+
+val Context.appComponent: AppComponent
+    get() = when (this) {
+        is MainApplication -> {
+            appComponent
+        }
+        else -> {
+            this.applicationContext.appComponent
+        }
+    }

@@ -3,8 +3,9 @@ package com.glebalekseevjk.premierleaguefixtures.data.mapper
 import com.glebalekseevjk.premierleaguefixtures.data.local.model.MatchInfoDbModel
 import com.glebalekseevjk.premierleaguefixtures.domain.entity.MatchInfo
 import com.glebalekseevjk.premierleaguefixtures.domain.mapper.Mapper
+import javax.inject.Inject
 
-class MatchInfoMapperImpl : Mapper<MatchInfo, MatchInfoDbModel> {
+class MatchInfoMapperImpl @Inject constructor() : Mapper<MatchInfo, MatchInfoDbModel> {
     override fun mapItemToDbModel(item: MatchInfo): MatchInfoDbModel {
         with(item) {
             return MatchInfoDbModel(

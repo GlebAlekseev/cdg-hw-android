@@ -10,8 +10,9 @@ import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.ListMatchesSt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ListMatchesViewModel(
+class ListMatchesViewModel @Inject constructor(
     private val matchInfoUseCase: MatchInfoUseCase
 ) : BaseViewModel<ListMatchesState>(ListMatchesState()) {
     private var isFirstError = true

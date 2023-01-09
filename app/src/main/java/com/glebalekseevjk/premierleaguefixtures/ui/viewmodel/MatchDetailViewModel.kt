@@ -3,8 +3,9 @@ package com.glebalekseevjk.premierleaguefixtures.ui.viewmodel
 import androidx.lifecycle.asLiveData
 import com.glebalekseevjk.premierleaguefixtures.domain.interactor.MatchInfoUseCase
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.MatchDetailState
+import javax.inject.Inject
 
-class MatchDetailViewModel(
+class MatchDetailViewModel @Inject constructor(
     private val matchInfoUseCase: MatchInfoUseCase
 ) : BaseViewModel<MatchDetailState>(MatchDetailState()) {
 
