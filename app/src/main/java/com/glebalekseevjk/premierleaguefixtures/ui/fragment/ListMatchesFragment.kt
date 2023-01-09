@@ -1,7 +1,6 @@
 package com.glebalekseevjk.premierleaguefixtures.ui.fragment
 
 import android.os.Bundle
-import android.transition.TransitionManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -15,7 +14,6 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.transition.Transition
 import com.glebalekseevjk.premierleaguefixtures.MainApplication
 import com.glebalekseevjk.premierleaguefixtures.R
 import com.glebalekseevjk.premierleaguefixtures.databinding.FragmentListMatchesBinding
@@ -101,6 +99,10 @@ class ListMatchesFragment : Fragment() {
                             }
                         )
                     }
+                    true
+                }
+                R.id.menu_search -> {
+                    // TODO()
                     true
                 }
                 else -> false

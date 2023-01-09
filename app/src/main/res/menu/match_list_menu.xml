@@ -3,6 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/menu_search"
+        android:icon="@drawable/ic_search_24"
+        android:iconTint="?attr/colorOnPrimary"
+        android:title="@string/search_text"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="always|collapseActionView" />
+    <item
         android:id="@+id/menu_change_view_type"
         android:icon="@drawable/ic_columns_24"
         android:iconTint="?attr/colorOnPrimary"

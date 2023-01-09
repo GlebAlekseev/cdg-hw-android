@@ -3,4 +3,6 @@
 
     <string name="vs_text">vs</string>
     <string name="display_list_mode_text">Режим отображения списка</string>
+    <string name="team_name_text">Название команды</string>
+    <string name="search_text">Поиск</string>
 </resources>

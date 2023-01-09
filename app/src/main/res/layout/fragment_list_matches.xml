@@ -21,6 +21,8 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
+                app:collapseIcon="@drawable/ic_back_24"
+                app:contentInsetStart="@dimen/spacing_small"
                 app:title="@string/app_name"
                 app:titleTextAppearance="@style/TextAppearance.Toolbar.Title"
                 app:titleTextColor="?attr/colorOnPrimary"
