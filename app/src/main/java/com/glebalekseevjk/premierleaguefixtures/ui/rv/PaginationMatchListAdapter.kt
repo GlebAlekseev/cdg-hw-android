@@ -18,7 +18,7 @@ class PaginationMatchListAdapter: ListAdapter<MatchInfo, PaginationMatchListAdap
     var openMatchDetailClickListener: ((matchNumber: Int) -> Unit)? = null
     var viewType = VIEW_TYPE_LIST
     var isLoadingAddedListener: (()->Boolean)? = null
-    val isLoadingAdded: Boolean
+    private val isLoadingAdded: Boolean
         get() = isLoadingAddedListener?.invoke() ?: throw RuntimeException("isLoadingAddedListener is not setup")
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {

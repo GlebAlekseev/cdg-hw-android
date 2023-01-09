@@ -1,6 +1,7 @@
 package com.glebalekseevjk.premierleaguefixtures.ui.fragment
 
 import android.os.Bundle
+import android.transition.TransitionManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,11 +9,12 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.glebalekseevjk.premierleaguefixtures.R
 import com.glebalekseevjk.premierleaguefixtures.databinding.FragmentListMatchesBinding
-import com.glebalekseevjk.premierleaguefixtures.domain.entity.MatchInfo
 import com.glebalekseevjk.premierleaguefixtures.ui.rv.MatchListAdapter
 import com.glebalekseevjk.premierleaguefixtures.ui.rv.PaginationMatchListAdapter
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.ListMatchesViewModel
@@ -20,6 +22,7 @@ import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.ListMatchesSt
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.ListMatchesState.Companion.LayoutManagerViewType.VIEW_TYPE_LIST
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -30,6 +33,7 @@ class ListMatchesFragment : Fragment() {
 
     private lateinit var matchListAdapter: PaginationMatchListAdapter
     private val listMatchesViewModel: ListMatchesViewModel by viewModels()
+    private val navController: NavController by lazy { findNavController() }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,12 +44,19 @@ class ListMatchesFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        postponeEnterTransition()
         super.onViewCreated(view, savedInstanceState)
         setupToolbar()
         observeSubmitListAdapter()
         setupRecyclerView()
-        CoroutineScope(Dispatchers.Main).launch {
-            listMatchesViewModel.loadNextPage()
+        if (savedInstanceState == null){
+            CoroutineScope(Dispatchers.Main).launch {
+                delay(100)
+                startPostponedEnterTransition()
+                listMatchesViewModel.loadNextPage()
+            }
+        }else{
+            startPostponedEnterTransition()
         }
     }
 
@@ -55,15 +66,25 @@ class ListMatchesFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        matchListAdapter = PaginationMatchListAdapter()
+        matchListAdapter = PaginationMatchListAdapter().apply {
+            viewType = when(listMatchesViewModel.currentState.layoutManagerViewType){
+                VIEW_TYPE_GRID -> PaginationMatchListAdapter.VIEW_TYPE_GRID
+                VIEW_TYPE_LIST -> PaginationMatchListAdapter.VIEW_TYPE_LIST
+            }
+        }
         binding.matchListRv.adapter = matchListAdapter
+        (binding.matchListRv.layoutManager as GridLayoutManager).apply {
+            spanCount = when(listMatchesViewModel.currentState.layoutManagerViewType){
+                VIEW_TYPE_GRID -> 2
+                VIEW_TYPE_LIST -> 1
+            }
+        }
         matchListAdapter.openMatchDetailClickListener = { matchNumber ->
             navigateToMatchDetailFragment(matchNumber)
         }
         val paginationScrollListener = object :
             PaginationScrollListener(binding.matchListRv.layoutManager as GridLayoutManager) {
             override suspend fun loadMoreItems() {
-                println("--------------- loadMoreItems")
                 listMatchesViewModel.loadNextPage()
             }
 
@@ -82,7 +103,7 @@ class ListMatchesFragment : Fragment() {
     private fun navigateToMatchDetailFragment(matchNumber: Int) {
         val action =
             ListMatchesFragmentDirections.actionListMatchesFragmentToMatchDetailFragment(matchNumber)
-        findNavController().navigate(action)
+        navController.navigate(action)
     }
 
     private fun observeSubmitListAdapter() {
@@ -91,17 +112,39 @@ class ListMatchesFragment : Fragment() {
                 matchListAdapter.submitList(it.listMatches)
                 when (it.layoutManagerViewType) {
                     VIEW_TYPE_GRID -> {
-                        matchListAdapter.viewType = MatchListAdapter.VIEW_TYPE_GRID
-                        (binding.matchListRv.layoutManager as GridLayoutManager).spanCount = 2
+                        if (matchListAdapter.viewType != MatchListAdapter.VIEW_TYPE_GRID){
+                            binding.matchListRv.post {
+                                TransitionManager.beginDelayedTransition(binding.matchListRv)
+                                (binding.matchListRv.layoutManager as GridLayoutManager).spanCount = 2
+                            }
+                            binding.matchListRv.postDelayed({
+                                matchListAdapter.viewType = MatchListAdapter.VIEW_TYPE_GRID
+                                refreshVisibleRecyclerViewItems(matchListAdapter, binding.matchListRv)
+                            },100)
+                        }
                     }
                     VIEW_TYPE_LIST -> {
-                        matchListAdapter.viewType = MatchListAdapter.VIEW_TYPE_LIST
-                        (binding.matchListRv.layoutManager as GridLayoutManager).spanCount = 1
+                        if (matchListAdapter.viewType != MatchListAdapter.VIEW_TYPE_LIST){
+                            binding.matchListRv.post {
+                                TransitionManager.beginDelayedTransition(binding.matchListRv)
+                                (binding.matchListRv.layoutManager as GridLayoutManager).spanCount = 1
+                            }
+                            binding.matchListRv.postDelayed({
+                                matchListAdapter.viewType = MatchListAdapter.VIEW_TYPE_LIST
+                                refreshVisibleRecyclerViewItems(matchListAdapter, binding.matchListRv)
+                            },100)
+                        }
                     }
                 }
-
             }
         }
+    }
+
+    private fun refreshVisibleRecyclerViewItems(adapter: PaginationMatchListAdapter, recyclerView: RecyclerView){
+        val layoutManager = recyclerView.layoutManager as GridLayoutManager
+        val visibleItemCount = layoutManager.childCount
+        val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+        adapter.notifyItemRangeChanged(firstVisibleItemPosition, firstVisibleItemPosition + visibleItemCount)
     }
 
     private fun setupToolbar() {

@@ -1,10 +1,6 @@
 package com.glebalekseevjk.premierleaguefixtures.ui.viewmodel
 
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 
 abstract class BaseViewModel<T>(initState: T): ViewModel() {
     // Шина состояний

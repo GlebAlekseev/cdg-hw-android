@@ -1,11 +1,14 @@
 package com.glebalekseevjk.premierleaguefixtures.ui.viewmodel
 
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.distinctUntilChanged
 import com.glebalekseevjk.premierleaguefixtures.data.repository.MatchInfoRepositoryImpl
 import com.glebalekseevjk.premierleaguefixtures.domain.interactor.MatchInfoUseCase
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.ListMatchesState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 class ListMatchesViewModel : BaseViewModel<ListMatchesState>(ListMatchesState()) {
     private val matchInfoRepository = MatchInfoRepositoryImpl()
@@ -37,8 +40,8 @@ class ListMatchesViewModel : BaseViewModel<ListMatchesState>(ListMatchesState())
             )
         }
 
-        delay(600)
         val isLast = with(Dispatchers.IO){
+            delay(600)
             matchInfoUseCase.addMatchListForPage(newPage) {
                 updateState {
                     it.copy(
