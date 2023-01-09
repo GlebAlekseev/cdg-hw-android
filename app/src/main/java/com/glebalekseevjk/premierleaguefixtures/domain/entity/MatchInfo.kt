@@ -12,9 +12,9 @@ data class MatchInfo(
     @SerializedName("Group") val group: Int?,
     @SerializedName("HomeTeamScore") val homeTeamScore: Int,
     @SerializedName("AwayTeamScore") val awayTeamScore: Int
-){
-    companion object{
-         val MOCK = MatchInfo(
+) {
+    companion object {
+        val MOCK = MatchInfo(
             0,
             0,
             "2021-08-14 14:00:00Z",

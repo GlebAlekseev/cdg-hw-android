@@ -4,17 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
             name="match"
             type="com.glebalekseevjk.premierleaguefixtures.domain.entity.MatchInfo" />
     </data>
 
     <com.google.android.material.card.MaterialCardView
-        app:cardCornerRadius="@dimen/corner_radius_normal"
-        app:cardBackgroundColor="?attr/colorSecondary"
-        android:layout_margin="@dimen/spacing_tiny"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/spacing_tiny"
+        app:cardBackgroundColor="?attr/colorSecondary"
+        app:cardCornerRadius="@dimen/corner_radius_normal">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -25,10 +26,10 @@
                 android:id="@+id/textView3"
                 matchNumber="@{match.matchNumber}"
                 roundNumber="@{match.roundNumber}"
-                android:textAppearance="@style/TextAppearance.ListItem.Large"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.ListItem.Large"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -55,12 +56,12 @@
 
                 android:paddingHorizontal="@dimen/spacing_small"
                 android:text="@{match.homeTeam}"
-                tools:text="Chelsea"
                 android:textAlignment="center"
                 android:textAppearance="@style/TextAppearance.ListItem.Medium"
                 app:layout_constraintEnd_toStartOf="@+id/textView5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView3" />
+                app:layout_constraintTop_toBottomOf="@+id/textView3"
+                tools:text="Chelsea" />
 
             <TextView
                 android:id="@+id/textView6"

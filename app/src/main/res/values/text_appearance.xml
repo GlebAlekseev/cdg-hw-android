@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <style name="Base.TextAppearance" parent="TextAppearance.Material3.BodyMedium">
         <item name="android:textColor">?attr/colorOnPrimary</item>
         <item name="android:textSize">16sp</item>

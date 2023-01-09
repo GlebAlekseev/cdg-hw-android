@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <style name="DetailMaterialCardView">
         <item name="cardElevation">@dimen/elevation_small</item>
         <item name="cardBackgroundColor">?attr/colorPrimary</item>
-        <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.DetailMaterialCardView</item>
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.DetailMaterialCardView
+        </item>
     </style>
 
     <style name="ShapeAppearanceOverlay.DetailMaterialCardView" parent="">

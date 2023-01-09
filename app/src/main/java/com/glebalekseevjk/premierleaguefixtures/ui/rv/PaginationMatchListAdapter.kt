@@ -14,15 +14,17 @@ import com.glebalekseevjk.premierleaguefixtures.databinding.ProgressRvListBindin
 import com.glebalekseevjk.premierleaguefixtures.domain.entity.MatchInfo
 
 
-class PaginationMatchListAdapter: ListAdapter<MatchInfo, PaginationMatchListAdapter.ItemViewHolder>(MatchInfoDiffCallBack()) {
+class PaginationMatchListAdapter :
+    ListAdapter<MatchInfo, PaginationMatchListAdapter.ItemViewHolder>(MatchInfoDiffCallBack()) {
     var openMatchDetailClickListener: ((matchNumber: Int) -> Unit)? = null
     var viewType = VIEW_TYPE_LIST
-    var isLoadingAddedListener: (()->Boolean)? = null
+    var isLoadingAddedListener: (() -> Boolean)? = null
     private val isLoadingAdded: Boolean
-        get() = isLoadingAddedListener?.invoke() ?: throw RuntimeException("isLoadingAddedListener is not setup")
+        get() = isLoadingAddedListener?.invoke()
+            ?: throw RuntimeException("isLoadingAddedListener is not setup")
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
-        val layout = when(viewType) {
+        val layout = when (viewType) {
             VIEW_TYPE_GRID -> R.layout.match_item_rv_grid
             VIEW_TYPE_LIST -> R.layout.match_item_rv_list
             VIEW_TYPE_LOADING -> R.layout.progress_rv_list
@@ -49,28 +51,28 @@ class PaginationMatchListAdapter: ListAdapter<MatchInfo, PaginationMatchListAdap
         holder.itemView.setOnClickListener {
             openMatchDetailClickListener?.invoke(item.matchNumber)
         }
-        when(binding){
-            is MatchItemRvListBinding ->{
+        when (binding) {
+            is MatchItemRvListBinding -> {
                 binding.match = item
             }
-            is MatchItemRvGridBinding ->{
+            is MatchItemRvGridBinding -> {
                 binding.match = item
             }
-            is ProgressRvListBinding ->{
+            is ProgressRvListBinding -> {
                 binding.paginationProgress.visibility = View.VISIBLE
             }
         }
     }
 
     override fun submitList(list: List<MatchInfo>?) {
-        if (isLoadingAdded){
+        if (isLoadingAdded) {
             super.submitList((list ?: listOf()) + listOf(MatchInfo.MOCK))
-        }else{
+        } else {
             super.submitList(list)
         }
     }
 
-    inner class ItemViewHolder(val binding: ViewDataBinding): RecyclerView.ViewHolder(binding.root)
+    inner class ItemViewHolder(val binding: ViewDataBinding) : RecyclerView.ViewHolder(binding.root)
 
     companion object {
         const val VIEW_TYPE_GRID = 2

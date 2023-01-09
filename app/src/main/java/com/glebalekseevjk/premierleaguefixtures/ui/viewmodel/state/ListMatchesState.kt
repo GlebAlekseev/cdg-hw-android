@@ -7,10 +7,11 @@ data class ListMatchesState(
     val listMatches: List<MatchInfo> = emptyList(),
     val isLastPage: Boolean = false,
     val isLoading: Boolean = true,
+    val isLoadingPage: Boolean = false,
     val currentPage: Int = 0,
-){
-    companion object{
-        enum class LayoutManagerViewType{
+) {
+    companion object {
+        enum class LayoutManagerViewType {
             VIEW_TYPE_GRID,
             VIEW_TYPE_LIST
         }

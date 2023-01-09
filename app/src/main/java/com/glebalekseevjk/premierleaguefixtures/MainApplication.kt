@@ -7,8 +7,20 @@ import com.glebalekseevjk.premierleaguefixtures.domain.interactor.MatchInfoUseCa
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.ListMatchesViewModelFactory
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.MatchDetailViewModelFactory
 
-class MainApplication: Application() {
+class MainApplication : Application() {
     private val matchInfoRepositoryImpl by lazy { MatchInfoRepositoryImpl(RetrofitClient.matchInfoApi) }
-    val listMatchesViewModelFactory by lazy { ListMatchesViewModelFactory(MatchInfoUseCase(matchInfoRepositoryImpl)) }
-    val matchDetailViewModelFactory by lazy { MatchDetailViewModelFactory(MatchInfoUseCase(matchInfoRepositoryImpl)) }
+    val listMatchesViewModelFactory by lazy {
+        ListMatchesViewModelFactory(
+            MatchInfoUseCase(
+                matchInfoRepositoryImpl
+            )
+        )
+    }
+    val matchDetailViewModelFactory by lazy {
+        MatchDetailViewModelFactory(
+            MatchInfoUseCase(
+                matchInfoRepositoryImpl
+            )
+        )
+    }
 }

@@ -2,7 +2,7 @@ package com.glebalekseevjk.premierleaguefixtures.ui.viewmodel
 
 import androidx.lifecycle.*
 
-abstract class BaseViewModel<T>(initState: T): ViewModel() {
+abstract class BaseViewModel<T>(initState: T) : ViewModel() {
     // Шина состояний
     private val _state: MediatorLiveData<T> = MediatorLiveData<T>().apply {
         value = initState

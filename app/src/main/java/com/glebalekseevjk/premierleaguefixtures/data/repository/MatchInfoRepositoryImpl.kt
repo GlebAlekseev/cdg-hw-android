@@ -8,9 +8,6 @@ import com.glebalekseevjk.premierleaguefixtures.domain.repository.MatchInfoRepos
 import com.glebalekseevjk.premierleaguefixtures.domain.repository.MatchInfoRepository.Companion.TOTAL_PER_PAGE
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import retrofit2.Response
 
 class MatchInfoRepositoryImpl(
@@ -22,39 +19,39 @@ class MatchInfoRepositoryImpl(
 
     override fun getMatch(matchNumber: Int): Flow<MatchInfo?> =
         _matchListLocalStore.map {
-            it.firstOrNull { it.matchNumber == matchNumber } }
+            it.firstOrNull { it.matchNumber == matchNumber }
+        }
 
-    override fun getMatchListRangeForPage(page: Int): Flow<Result<List<MatchInfo>>> = getMatchListRangeForPageFromNetwork(page).map {
-        when (it.status) {
-            ResultStatus.SUCCESS -> {
-                // добавляю с заменой существующих в хранилище. patch
-                val currentLocalList = _matchListLocalStore.value.toMutableList()
-                val newList = it.data
-                newList.forEach { matchInfo ->
-                    if (currentLocalList.contains(matchInfo)) {
-                        val old =
-                            currentLocalList.find { it.matchNumber == matchInfo.matchNumber }
-                        val indexOld = currentLocalList.indexOf(old)
-                        currentLocalList[indexOld] = matchInfo
-                    } else {
-                        currentLocalList.add(matchInfo)
+    override fun getMatchListRangeForPage(page: Int): Flow<Result<List<MatchInfo>>> =
+        getMatchListRangeForPageFromNetwork(page).map {
+            when (it.status) {
+                ResultStatus.SUCCESS -> {
+                    // добавляю с заменой существующих в хранилище. patch
+                    val currentLocalList = _matchListLocalStore.value.toMutableList()
+                    val newList = it.data
+                    newList.forEach { matchInfo ->
+                        if (currentLocalList.contains(matchInfo)) {
+                            val old =
+                                currentLocalList.find { it.matchNumber == matchInfo.matchNumber }
+                            val indexOld = currentLocalList.indexOf(old)
+                            currentLocalList[indexOld] = matchInfo
+                        } else {
+                            currentLocalList.add(matchInfo)
+                        }
                     }
-                }
-                _matchListLocalStore.emit(currentLocalList)
+                    _matchListLocalStore.emit(currentLocalList)
 
-                // Получение данных из локального хранилища. cache
-                val list = getRangeListForPage(_matchListLocalStore.value, page)
-                return@map Result(it.status, list)
-            }
-            ResultStatus.LOADING -> return@map it
-            ResultStatus.FAILURE -> {
-                val list = getRangeListForPage(_matchListLocalStore.value, page)
-                return@map Result(it.status, list)
+                    // Получение данных из локального хранилища. cache
+                    val list = getRangeListForPage(_matchListLocalStore.value, page)
+                    return@map Result(it.status, list)
+                }
+                ResultStatus.LOADING -> return@map it
+                ResultStatus.FAILURE -> {
+                    val list = getRangeListForPage(_matchListLocalStore.value, page)
+                    return@map Result(it.status, list)
+                }
             }
         }
-    }
-
-
 
     private fun getMatchListRangeForPageFromNetwork(page: Int): Flow<Result<List<MatchInfo>>> =
         flow {
@@ -64,10 +61,12 @@ class MatchInfoRepositoryImpl(
             }.getOrNull()
             val result = getResultFromMatchInfoListResponse(matchInfoListResponse)
             when (result.status) {
-                ResultStatus.SUCCESS -> emit(Result(
-                    ResultStatus.SUCCESS,
-                    getRangeListForPage(result.data, page)
-                ))
+                ResultStatus.SUCCESS -> emit(
+                    Result(
+                        ResultStatus.SUCCESS,
+                        getRangeListForPage(result.data, page)
+                    )
+                )
                 else -> emit(result)
             }
         }.flowOn(Dispatchers.IO)

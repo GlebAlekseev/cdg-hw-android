@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
+
     <FrameLayout
-        android:layout_marginVertical="@dimen/spacing_small"
-        android:background="@android:color/transparent"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/spacing_small"
+        android:background="@android:color/transparent">
 
         <ProgressBar
             android:id="@+id/pagination_progress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:indeterminateTint="?attr/colorPrimary"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            android:indeterminateTint="?attr/colorPrimary" />
     </FrameLayout>
 </layout>

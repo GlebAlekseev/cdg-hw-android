@@ -8,32 +8,29 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-abstract class PaginationScrollListener(private val layoutManager: GridLayoutManager): RecyclerView.OnScrollListener() {
-    private var lock = false
+abstract class PaginationScrollListener: RecyclerView.OnScrollListener() {
     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
         super.onScrolled(recyclerView, dx, dy)
+        val layoutManager = recyclerView.layoutManager as GridLayoutManager
 
         val visibleItemCount = layoutManager.childCount
         val totalItemCount = layoutManager.itemCount
         val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
 
-        if (!lock && isLoading() && !isLastPage()) {
+        if (!isLoadingPage() && isLoading() && !isLastPage()) {
             if (visibleItemCount + firstVisibleItemPosition >= totalItemCount
                 && firstVisibleItemPosition >= 0
             ) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    lock = true
-                    loadMoreItems{
-                        lock = false
-                    }
-                }
+                loadMoreItems()
             }
         }
     }
 
-    protected abstract suspend fun loadMoreItems(onFinishCallback: ()->Unit)
+    protected abstract fun loadMoreItems()
 
     protected abstract fun isLastPage(): Boolean
 
     protected abstract fun isLoading(): Boolean
+
+    protected abstract fun isLoadingPage(): Boolean
 }

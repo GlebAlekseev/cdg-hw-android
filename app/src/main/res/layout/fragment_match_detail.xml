@@ -1,39 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<layout xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
     <data>
+
         <variable
             name="matchDetailViewModel"
             type="com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.MatchDetailViewModel" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:layout_height="match_parent"
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:background="?attr/colorOnPrimary">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:elevation="@dimen/zero">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:navigationIcon="?attr/homeAsUpIndicator"
-            app:navigationIconTint="?attr/colorOnPrimary"
-            app:titleTextAppearance="@style/TextAppearance.Toolbar.Title"
-            tools:title="PLF Match 1 Round 0"
-            app:titleTextColor="?attr/colorOnPrimary"
-            matchNumber="@{matchDetailViewModel.state.matchInfo.matchNumber}"
-            roundNumber="@{matchDetailViewModel.state.matchInfo.roundNumber}"
-            app:titleCentered="true"
-            />
-    </com.google.android.material.appbar.AppBarLayout>
+            android:layout_height="wrap_content"
+            app:elevation="@dimen/zero">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                matchNumber="@{matchDetailViewModel.state.matchInfo.matchNumber}"
+                roundNumber="@{matchDetailViewModel.state.matchInfo.roundNumber}"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:navigationIcon="?attr/homeAsUpIndicator"
+                app:navigationIconTint="?attr/colorOnPrimary"
+                app:titleCentered="true"
+                app:titleTextAppearance="@style/TextAppearance.Toolbar.Title"
+                app:titleTextColor="?attr/colorOnPrimary"
+                tools:title="PLF Match 1 Round 0" />
+        </com.google.android.material.appbar.AppBarLayout>
 
 
         <androidx.core.widget.NestedScrollView
@@ -43,16 +44,16 @@
 
             <com.google.android.material.card.MaterialCardView
                 style="@style/DetailMaterialCardView"
-                android:layout_marginHorizontal="@dimen/spacing_normal"
-                app:cardPreventCornerOverlap="false"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_width="match_parent">
+                android:layout_marginHorizontal="@dimen/spacing_normal"
+                app:cardPreventCornerOverlap="false">
 
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:paddingVertical="@dimen/spacing_huge"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_width="match_parent">
+                    android:paddingVertical="@dimen/spacing_huge">
 
                     <TextView
                         android:id="@+id/hour_minute_tv"
@@ -99,8 +100,8 @@
                             isHome="@{true}"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:padding="15dp"
                             android:layout_gravity="center"
+                            android:padding="15dp"
                             android:textAlignment="center"
                             android:textAppearance="@style/TextAppearance.DetailContent.Large"
                             tools:text="4" />
@@ -139,8 +140,8 @@
                             isHome="@{false}"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:padding="15dp"
                             android:layout_gravity="center"
+                            android:padding="15dp"
                             android:textAlignment="center"
                             android:textAppearance="@style/TextAppearance.DetailContent.Large"
                             tools:text="2" />
@@ -151,6 +152,7 @@
                         android:id="@+id/textView8"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_huge"
                         android:text="@{matchDetailViewModel.state.matchInfo.location}"
                         android:textAlignment="center"
                         android:textAppearance="@style/TextAppearance.DetailContent.Small"
@@ -158,7 +160,6 @@
                         app:layout_constraintEnd_toEndOf="@+id/textView7"
                         app:layout_constraintStart_toStartOf="@+id/textView2"
                         app:layout_constraintTop_toBottomOf="@+id/materialCardView"
-                        android:layout_marginTop="@dimen/spacing_huge"
                         tools:text="Brentford Community Stadium" />
 
                     <com.google.android.material.card.MaterialCardView
