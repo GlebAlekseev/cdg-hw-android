@@ -1,11 +1,12 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <style name="Theme.PremierLeagueFixtures" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/blue_100</item>
-        <item name="colorOnPrimary">@color/blue_900</item>
-        <item name="colorSecondary">@color/blue_200</item>
-        <item name="colorOnSecondary">@color/blue_700</item>
-        <item name="colorAccent">@color/blue_400</item>
+        <item name="colorPrimary">@color/blue_400</item>
+        <item name="colorOnPrimary">@color/gray_300</item>
+        <item name="colorSecondary">@color/gray_700</item>
+        <item name="colorOnSecondary">@color/blue_600</item>
 
-<!--        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>-->
+        <item name="android:textAppearance">@style/Base.TextAppearance</item>
+        <item name="android:statusBarColor">?attr/colorPrimary</item>
+        <item name="android:windowBackground">?attr/colorPrimary</item>
     </style>
 </resources>

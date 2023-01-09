@@ -12,7 +12,7 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:background="?attr/colorPrimary">
+        android:background="?attr/colorOnPrimary">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbar"
@@ -26,6 +26,7 @@
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="?attr/homeAsUpIndicator"
             app:navigationIconTint="?attr/colorOnPrimary"
+            app:titleTextAppearance="@style/TextAppearance.Toolbar.Title"
             tools:title="PLF Match 1 Round 0"
             app:titleTextColor="?attr/colorOnPrimary"
             matchNumber="@{matchDetailViewModel.state.matchInfo.matchNumber}"
@@ -37,137 +38,185 @@
 
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <com.google.android.material.card.MaterialCardView
+                style="@style/DetailMaterialCardView"
+                android:layout_marginHorizontal="@dimen/spacing_normal"
+                app:cardPreventCornerOverlap="false"
                 android:layout_height="match_parent"
-                android:orientation="horizontal"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                android:background="?attr/colorPrimary"
-                app:layout_constraintTop_toTopOf="parent">
+                android:layout_width="match_parent">
 
-                <LinearLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:text="Brentford"
-                        android:text="@{matchDetailViewModel.state.matchInfo.homeTeam}"
-                        android:textSize="22sp"
-                        android:textAlignment="center"
-                        android:textColor="?attr/colorOnPrimary"
-                        />
-                </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:paddingVertical="@dimen/spacing_huge"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
+                    android:layout_width="match_parent">
 
                     <TextView
                         android:id="@+id/hour_minute_tv"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        tools:text="21:45"
                         hourMinuteAsText="@{matchDetailViewModel.state.matchInfo.dateUtc}"
-                        android:textSize="30sp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:textAlignment="center"
-                        android:textColor="?attr/colorOnPrimary"
-                        />
+                        android:textAppearance="@style/TextAppearance.DetailContent.Large"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:text="21:45" />
+
                     <TextView
                         android:id="@+id/day_month_year_tv"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        tools:text="Понедельник, \n23 Августа 2017"
                         dayMonthYearAsText="@{matchDetailViewModel.state.matchInfo.dateUtc}"
-                        android:textSize="22sp"
-                        android:textAlignment="center"
-                        android:layout_marginTop="10dp"
-                        android:textColor="?attr/colorOnSecondary"
-                        />
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                        android:layout_width="180dp"
                         android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:layout_marginTop="15dp"
-                        android:orientation="horizontal">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            tools:text="4"
-                            homeTeamScore="@{matchDetailViewModel.state.matchInfo.homeTeamScore}"
-                            awayTeamScore="@{matchDetailViewModel.state.matchInfo.awayTeamScore}"
-                            isHome="@{true}"
-                            android:background="?attr/colorAccent"
-                            android:padding="15dp"
-                            android:textSize="22sp"
-                            android:textAlignment="center"
-                            android:textColor="?attr/colorOnPrimary"
-                            />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            tools:text="vs"
-                            android:textStyle="bold"
-                            android:textSize="22sp"
-                            android:textAlignment="center"
-                            android:layout_marginLeft="10dp"
-                            android:layout_marginRight="10dp"
-                            android:textColor="?attr/colorOnPrimary"
-                            />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            tools:text="2"
-                            homeTeamScore="@{matchDetailViewModel.state.matchInfo.homeTeamScore}"
-                            awayTeamScore="@{matchDetailViewModel.state.matchInfo.awayTeamScore}"
-                            isHome="@{false}"
-                            android:padding="15dp"
-                            android:background="?attr/colorAccent"
-                            android:textSize="22sp"
-                            android:textAlignment="center"
-                            android:textColor="?attr/colorOnPrimary"
-                            />
-                    </LinearLayout>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:text="Brentford Community Stadium"
-                        android:text="@{matchDetailViewModel.state.matchInfo.location}"
-                        android:textSize="22sp"
-                        android:layout_marginTop="30dp"
+                        android:layout_marginTop="@dimen/spacing_small"
                         android:textAlignment="center"
-                        android:textColor="?attr/colorOnPrimary"
-                        />
-                </LinearLayout>
+                        android:textAppearance="@style/TextAppearance.DetailContent.Medium"
+                        app:layout_constraintEnd_toEndOf="@+id/hour_minute_tv"
+                        app:layout_constraintStart_toStartOf="@+id/hour_minute_tv"
+                        app:layout_constraintTop_toBottomOf="@+id/hour_minute_tv"
+                        tools:text="Понедельник, \n23 Августа 2017" />
 
-                <LinearLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
-                    <TextView
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/textView2"
+                        awayTeamScore="@{matchDetailViewModel.state.matchInfo.awayTeamScore}"
+                        homeTeamScore="@{matchDetailViewModel.state.matchInfo.homeTeamScore}"
+                        isHome="@{true}"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        tools:text="Arsenal"
-                        android:text="@{matchDetailViewModel.state.matchInfo.awayTeam}"
-                        android:textSize="22sp"
+                        android:minHeight="120dp"
+                        app:cardBackgroundColor="?attr/colorAccent"
+                        app:layout_constraintBottom_toBottomOf="@+id/materialCardView"
+                        app:layout_constraintStart_toEndOf="@+id/materialCardView"
+                        app:layout_constraintTop_toTopOf="@+id/materialCardView"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.DetailMaterialCardView.Right">
+
+                        <TextView
+                            awayTeamScore="@{matchDetailViewModel.state.matchInfo.awayTeamScore}"
+                            homeTeamScore="@{matchDetailViewModel.state.matchInfo.homeTeamScore}"
+                            isHome="@{true}"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:padding="15dp"
+                            android:layout_gravity="center"
+                            android:textAlignment="center"
+                            android:textAppearance="@style/TextAppearance.DetailContent.Large"
+                            tools:text="4" />
+                    </com.google.android.material.card.MaterialCardView>
+
+
+                    <TextView
+                        android:id="@+id/textView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/vs_text"
                         android:textAlignment="center"
-                        android:textColor="?attr/colorOnPrimary"
-                        />
-                </LinearLayout>
-            </LinearLayout>
+                        android:textAppearance="@style/TextAppearance.DetailContent.Large"
+                        app:layout_constraintBottom_toBottomOf="@+id/textView2"
+                        app:layout_constraintEnd_toEndOf="@+id/day_month_year_tv"
+                        app:layout_constraintStart_toStartOf="@+id/day_month_year_tv"
+                        app:layout_constraintTop_toTopOf="@+id/textView2" />
+
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/textView7"
+                        awayTeamScore="@{matchDetailViewModel.state.matchInfo.awayTeamScore}"
+                        homeTeamScore="@{matchDetailViewModel.state.matchInfo.homeTeamScore}"
+                        isHome="@{false}"
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        app:cardBackgroundColor="?attr/colorAccent"
+                        app:layout_constraintBottom_toBottomOf="@+id/textView2"
+                        app:layout_constraintEnd_toStartOf="@+id/materialCardView3"
+                        app:layout_constraintTop_toTopOf="@+id/textView2"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.DetailMaterialCardView.Left">
+
+                        <TextView
+                            awayTeamScore="@{matchDetailViewModel.state.matchInfo.awayTeamScore}"
+                            homeTeamScore="@{matchDetailViewModel.state.matchInfo.homeTeamScore}"
+                            isHome="@{false}"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="15dp"
+                            android:layout_gravity="center"
+                            android:textAlignment="center"
+                            android:textAppearance="@style/TextAppearance.DetailContent.Large"
+                            tools:text="2" />
+                    </com.google.android.material.card.MaterialCardView>
+
+
+                    <TextView
+                        android:id="@+id/textView8"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="@{matchDetailViewModel.state.matchInfo.location}"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/TextAppearance.DetailContent.Small"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="@+id/textView7"
+                        app:layout_constraintStart_toStartOf="@+id/textView2"
+                        app:layout_constraintTop_toBottomOf="@+id/materialCardView"
+                        android:layout_marginTop="@dimen/spacing_huge"
+                        tools:text="Brentford Community Stadium" />
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/materialCardView"
+                        awayTeamScore="@{matchDetailViewModel.state.matchInfo.awayTeamScore}"
+                        homeTeamScore="@{matchDetailViewModel.state.matchInfo.homeTeamScore}"
+                        isHome="@{true}"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_huge"
+                        android:minHeight="260dp"
+                        app:cardBackgroundColor="?attr/colorAccent"
+                        app:layout_constraintEnd_toStartOf="@+id/day_month_year_tv"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/day_month_year_tv"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.DetailMaterialCardView.Right">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="@{matchDetailViewModel.state.matchInfo.homeTeam}"
+                            android:textAlignment="center"
+                            android:textAppearance="@style/TextAppearance.DetailContent.Small"
+                            tools:text="Brentford " />
+                    </com.google.android.material.card.MaterialCardView>
+
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/materialCardView3"
+                        awayTeamScore="@{matchDetailViewModel.state.matchInfo.awayTeamScore}"
+                        homeTeamScore="@{matchDetailViewModel.state.matchInfo.homeTeamScore}"
+                        isHome="@{false}"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        app:cardBackgroundColor="?attr/colorAccent"
+                        app:layout_constraintBottom_toBottomOf="@+id/materialCardView"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/day_month_year_tv"
+                        app:layout_constraintTop_toTopOf="@+id/materialCardView"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.DetailMaterialCardView.Left">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="@{matchDetailViewModel.state.matchInfo.awayTeam}"
+                            android:textAlignment="center"
+                            android:textAppearance="@style/TextAppearance.DetailContent.Small"
+                            app:layout_constraintBottom_toBottomOf="@+id/textView7"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@+id/textView7"
+                            app:layout_constraintTop_toTopOf="@+id/textView7"
+                            tools:text="Arsenal" />
+                    </com.google.android.material.card.MaterialCardView>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
         </androidx.core.widget.NestedScrollView>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>
