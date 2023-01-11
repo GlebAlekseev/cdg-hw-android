@@ -1,4 +1,4 @@
-package com.glebalekseevjk.premierleaguefixtures.ui.fragment
+package com.glebalekseevjk.premierleaguefixtures.ui.listener
 
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView

@@ -7,7 +7,7 @@
         android:icon="@drawable/ic_search_24"
         android:iconTint="?attr/colorOnPrimary"
         android:title="@string/search_text"
-        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:actionViewClass="com.glebalekseevjk.premierleaguefixtures.ui.custom.CustomSearchView"
         app:showAsAction="always|collapseActionView" />
     <item
         android:id="@+id/menu_change_view_type"
