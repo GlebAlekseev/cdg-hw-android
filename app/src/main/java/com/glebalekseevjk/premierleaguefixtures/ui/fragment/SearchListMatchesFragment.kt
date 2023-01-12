@@ -6,8 +6,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
+import android.widget.SearchView
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.widget.SearchView.OnQueryTextListener
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -19,17 +23,20 @@ import com.glebalekseevjk.premierleaguefixtures.R
 import com.glebalekseevjk.premierleaguefixtures.appComponent
 import com.glebalekseevjk.premierleaguefixtures.databinding.FragmentListMatchesBinding
 import com.glebalekseevjk.premierleaguefixtures.domain.entity.MatchInfo
+import com.glebalekseevjk.premierleaguefixtures.ui.custom.CustomSearchView
 import com.glebalekseevjk.premierleaguefixtures.ui.listener.PaginationScrollListener
 import com.glebalekseevjk.premierleaguefixtures.ui.rv.PaginationMatchListAdapter
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.ListMatchesViewModel
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.ListMatchesState.Companion.LayoutManagerViewType.VIEW_TYPE_GRID
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.ListMatchesState.Companion.LayoutManagerViewType.VIEW_TYPE_LIST
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
-class ListMatchesFragment : Fragment() {
+class SearchListMatchesFragment : Fragment() {
     private var _binding: FragmentListMatchesBinding? = null
     private val binding: FragmentListMatchesBinding
         get() = _binding ?: throw RuntimeException("FragmentListMatchesBinding is null")
@@ -43,12 +50,19 @@ class ListMatchesFragment : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        context.appComponent.createListMatchesFragmentSubcomponent().inject(this)
+        context.appComponent.createSearchListMatchesFragmentSubcomponent().inject(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         listMatchesViewModel =
             ViewModelProvider(this, viewModelFactory)[ListMatchesViewModel::class.java]
+        if (savedInstanceState == null){
+            listMatchesViewModel.updateState {
+                it.copy(
+                    isLoading = false
+                )
+            }
+        }
         super.onCreate(savedInstanceState)
     }
 
@@ -63,7 +77,7 @@ class ListMatchesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         postponeEnterTransition()
         super.onViewCreated(view, savedInstanceState)
-        setupToolbar()
+        setupToolbar(savedInstanceState)
         observeSubmitListAdapter()
         setupRecyclerView()
         initListeners()
@@ -72,7 +86,6 @@ class ListMatchesFragment : Fragment() {
                 delay(100)
                 startPostponedEnterTransition()
             }
-//            loadNextPage()
         } else {
             startPostponedEnterTransition()
         }
@@ -83,9 +96,41 @@ class ListMatchesFragment : Fragment() {
         _binding = null
     }
 
-    private fun setupToolbar() {
+    private fun setupToolbar(savedInstanceState: Bundle?) {
         val toolbar = binding.toolbar
-        toolbar.inflateMenu(R.menu.match_list_menu)
+        toolbar.inflateMenu(R.menu.match_search_list_menu)
+        val searchViewMenuItem = toolbar.menu.findItem(R.id.menu_search)
+        val customSearchView = searchViewMenuItem.actionView as CustomSearchView
+        customSearchView.setOnSearchViewCollapsedListener {
+            navController.popBackStack()
+        }
+        customSearchView.setOnQueryTextFocusChangeListener { view, hasFocus ->
+            if (savedInstanceState == null){
+                if (hasFocus){
+                    openKeyBoard(view.findFocus())
+                }
+            }
+        }
+        customSearchView.setOnQueryTextListener(object : OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                if (newText != null && newText != "" && newText != listMatchesViewModel.currentState.requestTeamName){
+                    listMatchesViewModel.resetPaginationListHolder {
+                        listMatchesViewModel.updateState {
+                            it.copy(
+                                requestTeamName = newText.trim()
+                            )
+                        }
+                        listMatchesViewModel.loadNextPageFromLocalForRequest()
+                    }
+                }
+                return true
+            }
+        })
+        searchViewMenuItem.expandActionView()
         toolbar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.menu_change_view_type -> {
@@ -112,7 +157,6 @@ class ListMatchesFragment : Fragment() {
                     true
                 }
                 R.id.menu_search -> {
-                    navigateToSearchListMatchesFragment()
                     true
                 }
                 else -> false
@@ -128,7 +172,6 @@ class ListMatchesFragment : Fragment() {
                     VIEW_TYPE_GRID -> {
                         if (matchListAdapter.viewType != PaginationMatchListAdapter.VIEW_TYPE_GRID) {
                             binding.matchListRv.post {
-
                                 (binding.matchListRv.layoutManager as GridLayoutManager).spanCount =
                                     if (matchListAdapter.itemCount == 1
                                         && matchListAdapter.currentList[0] == MatchInfo.MOCK) 1 else 2
@@ -206,32 +249,16 @@ class ListMatchesFragment : Fragment() {
 
     private fun navigateToMatchDetailFragment(matchNumber: Int) {
         val action =
-            ListMatchesFragmentDirections.actionListMatchesFragmentToMatchDetailFragment(matchNumber)
-        navController.navigate(action)
-    }
-
-    private fun navigateToSearchListMatchesFragment() {
-        val action =
-            ListMatchesFragmentDirections.actionListMatchesFragmentToSearchListMatchesFragment()
+            SearchListMatchesFragmentDirections.actionSearchListMatchesFragmentToMatchDetailFragment(matchNumber)
         navController.navigate(action)
     }
 
     private fun initListeners() {
-        binding.matchInfoListUpSrl.setOnRefreshListener {
-            lifecycleScope.launch {
-                listMatchesViewModel.resetPaginationListHolder {
-                    loadNextPage()
-                    binding.matchInfoListUpSrl.isRefreshing = false
-                }
-            }
-        }
+        binding.matchInfoListUpSrl.isEnabled = false
     }
 
     private fun loadNextPage() {
-        listMatchesViewModel.loadNextPage {
-            Log.d("ListMatchesFragment", it)
-            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-        }
+        listMatchesViewModel.loadNextPageFromLocalForRequest()
     }
 
     private fun refreshVisibleRecyclerViewItems(
@@ -245,5 +272,11 @@ class ListMatchesFragment : Fragment() {
             firstVisibleItemPosition,
             firstVisibleItemPosition + visibleItemCount
         )
+    }
+
+    private fun openKeyBoard(view: View) {
+        val inputMethodManager: InputMethodManager? =
+            ContextCompat.getSystemService(requireContext(), InputMethodManager::class.java)
+        inputMethodManager?.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
     }
 }

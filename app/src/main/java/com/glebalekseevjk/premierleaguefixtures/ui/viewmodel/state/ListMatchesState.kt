@@ -9,6 +9,7 @@ data class ListMatchesState(
     val isLoading: Boolean = true,
     val isLoadingPage: Boolean = false,
     val currentPage: Int = 0,
+    val requestTeamName: String = ""
 ) {
     companion object {
         enum class LayoutManagerViewType {

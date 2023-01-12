@@ -10,6 +10,7 @@ class CustomSearchView @JvmOverloads constructor(
     private var onSearchViewCollapsedListener: (() -> Unit)? = null
     private var onSearchViewExpandedListener: (() -> Unit)? = null
 
+    private var isExpanded: Boolean = true
     override fun onActionViewCollapsed() {
         onSearchViewCollapsedListener?.invoke()
         super.onActionViewCollapsed()
@@ -18,13 +19,10 @@ class CustomSearchView @JvmOverloads constructor(
     override fun onActionViewExpanded() {
         onSearchViewExpandedListener?.invoke()
         super.onActionViewExpanded()
+
     }
 
     fun setOnSearchViewCollapsedListener(listener: ()->Unit){
         onSearchViewCollapsedListener = listener
-    }
-
-    fun setOnSearchViewExpandedListener(listener: ()->Unit){
-        onSearchViewExpandedListener = listener
     }
 }

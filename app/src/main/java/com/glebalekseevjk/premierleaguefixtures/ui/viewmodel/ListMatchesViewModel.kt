@@ -76,6 +76,41 @@ class ListMatchesViewModel @Inject constructor(
         }
     }
 
+    fun loadNextPageFromLocalForRequest(){
+        if (currentState.isLastPage) return
+        val newPage = currentState.currentPage + 1
+
+        updateState {
+            it.copy(
+                isLoading = true,
+                isLoadingPage = true,
+                currentPage = newPage
+            )
+        }
+
+        viewModelScope.launch{
+            val result = matchInfoUseCase.searchTeamNamePagedMatchInfoList(currentState.requestTeamName, newPage)
+            val isLast = result.size < MatchInfoRepository.TOTAL_PER_PAGE
+            with(Dispatchers.Main) {
+                updateState {
+                    it.copy(
+                        isLoading = !isLast,
+                        isLastPage = isLast
+                    )
+                }
+            }
+
+            if (currentState.isLoadingPage) {
+                _paginationMatchInfoListHolder.emit(_paginationMatchInfoListHolder.value + result)
+                updateState {
+                    it.copy(
+                        isLoadingPage = false
+                    )
+                }
+            }
+        }
+    }
+
     fun resetPaginationListHolder(onResetCallBack: () -> Unit) {
         viewModelScope.launch {
             updateState {

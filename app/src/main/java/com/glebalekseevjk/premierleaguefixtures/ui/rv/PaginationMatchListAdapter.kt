@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.glebalekseevjk.premierleaguefixtures.R
 import com.glebalekseevjk.premierleaguefixtures.databinding.MatchItemRvGridBinding
 import com.glebalekseevjk.premierleaguefixtures.databinding.MatchItemRvListBinding
+import com.glebalekseevjk.premierleaguefixtures.databinding.NotFoundRvListBinding
 import com.glebalekseevjk.premierleaguefixtures.databinding.ProgressRvListBinding
 import com.glebalekseevjk.premierleaguefixtures.domain.entity.MatchInfo
 
@@ -28,6 +29,7 @@ class PaginationMatchListAdapter :
             VIEW_TYPE_GRID -> R.layout.match_item_rv_grid
             VIEW_TYPE_LIST -> R.layout.match_item_rv_list
             VIEW_TYPE_LOADING -> R.layout.progress_rv_list
+            VIEW_TYPE_NOT_FOUND -> R.layout.not_found_rv_list
             else -> throw RuntimeException("Unknown view type $viewType")
         }
         val binding = DataBindingUtil.inflate<ViewDataBinding>(
@@ -40,7 +42,9 @@ class PaginationMatchListAdapter :
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (position == itemCount - 1 && isLoadingAdded) {
+        return if (itemCount == 1 && currentList[0] == MatchInfo.MOCK && !isLoadingAdded) {
+            VIEW_TYPE_NOT_FOUND
+        }else if (position == itemCount - 1 && isLoadingAdded) {
             VIEW_TYPE_LOADING
         } else if (viewType == VIEW_TYPE_LIST) VIEW_TYPE_LIST else VIEW_TYPE_GRID
     }
@@ -60,6 +64,10 @@ class PaginationMatchListAdapter :
             }
             is ProgressRvListBinding -> {
                 binding.paginationProgress.visibility = View.VISIBLE
+                holder.itemView.setOnClickListener(null)
+            }
+            is NotFoundRvListBinding -> {
+                holder.itemView.setOnClickListener(null)
             }
         }
     }
@@ -68,13 +76,18 @@ class PaginationMatchListAdapter :
         if (isLoadingAdded) {
             super.submitList((list ?: listOf()) + listOf(MatchInfo.MOCK))
         } else {
-            super.submitList(list)
+            if (list == null || list.isEmpty()){
+                super.submitList(listOf(MatchInfo.MOCK))
+            }else{
+                super.submitList(list)
+            }
         }
     }
 
     inner class ItemViewHolder(val binding: ViewDataBinding) : RecyclerView.ViewHolder(binding.root)
 
     companion object {
+        const val VIEW_TYPE_NOT_FOUND = 3
         const val VIEW_TYPE_GRID = 2
         const val VIEW_TYPE_LIST = 1
         const val VIEW_TYPE_LOADING = 0

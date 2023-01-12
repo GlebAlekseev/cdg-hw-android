@@ -27,6 +27,19 @@ class MatchInfoRepositoryImpl @Inject constructor(
     override fun getMatch(matchNumber: Int): Flow<MatchInfo?> =
         matchInfoDao.get(matchNumber).asFlow().map { it?.let { mapper.mapDbModelToItem(it) } }
 
+    override suspend fun searchTeamNamePagedMatchInfoList(
+        teamName: String,
+        page: Int
+    ): List<MatchInfo> {
+        return with(Dispatchers.IO){
+            matchInfoDao.searchTeamNamePagedMatchInfoList(
+                TOTAL_PER_PAGE,
+                page * TOTAL_PER_PAGE - TOTAL_PER_PAGE,
+                teamName
+            ).map { mapper.mapDbModelToItem(it) }
+        }
+    }
+
     override fun getMatchListRangeForPage(page: Int): Flow<Result<List<MatchInfo>>> =
         getMatchListRangeForPageFromNetwork(page).map {
             when (it.status) {

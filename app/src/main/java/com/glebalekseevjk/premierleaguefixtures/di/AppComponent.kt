@@ -16,6 +16,7 @@ interface AppComponent {
     fun injectMainApplication(application: MainApplication)
     fun createListMatchesFragmentSubcomponent(): ListMatchesFragmentSubcomponent
     fun createMatchDetailFragmentSubcomponent(): MatchDetailFragmentSubcomponent
+    fun createSearchListMatchesFragmentSubcomponent(): SearchListMatchesFragmentSubcomponent
 
     @Component.Factory
     interface Builder {

@@ -37,6 +37,7 @@
         <item name="closeIconTint">?attr/colorOnPrimary</item>
         <item name="queryHint">@string/team_name_text</item>
         <item name="closeIcon">@drawable/ic_cross_24</item>
+        <item name="android:maxWidth">99999dp</item>
     </style>
 
     <style name="SearchAutoCompleteTextView" parent="Widget.AppCompat.Light.AutoCompleteTextView">
