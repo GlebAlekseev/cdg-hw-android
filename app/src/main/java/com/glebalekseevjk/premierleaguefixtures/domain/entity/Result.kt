@@ -1,13 +1,11 @@
 package com.glebalekseevjk.premierleaguefixtures.domain.entity
 
-
-enum class ResultStatus {
-    SUCCESS,
-    LOADING,
-    FAILURE,
+sealed class ResultType {
+    object Loading : ResultType()
+    class Success<T>(val data: T) : ResultType()
+    class Failure(val errorType: ErrorType) : ResultType()
 }
 
-data class Result<T>(
-    val status: ResultStatus,
-    val data: T
-)
+sealed class ErrorType {
+    object Unknown : ErrorType()
+}
