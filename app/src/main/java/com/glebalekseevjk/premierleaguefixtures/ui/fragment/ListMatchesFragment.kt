@@ -18,12 +18,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.glebalekseevjk.premierleaguefixtures.R
 import com.glebalekseevjk.premierleaguefixtures.appComponent
 import com.glebalekseevjk.premierleaguefixtures.databinding.FragmentListMatchesBinding
-import com.glebalekseevjk.premierleaguefixtures.domain.entity.MatchInfo
+import com.glebalekseevjk.premierleaguefixtures.domain.entity.ErrorType
 import com.glebalekseevjk.premierleaguefixtures.ui.listener.PaginationScrollListener
 import com.glebalekseevjk.premierleaguefixtures.ui.rv.PaginationMatchListAdapter
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.ListMatchesViewModel
-import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.ListMatchesState.Companion.LayoutManagerViewType.VIEW_TYPE_GRID
-import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.ListMatchesState.Companion.LayoutManagerViewType.VIEW_TYPE_LIST
+import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.intent.ListMatchesIntent
+import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.LayoutManagerState
+import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.PaginationListMatchesState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -63,24 +64,27 @@ class ListMatchesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         postponeEnterTransition()
         super.onViewCreated(view, savedInstanceState)
-        setupToolbar()
-        observeSubmitListAdapter()
         setupRecyclerView()
+        setupToolbar()
+        observeViewModel()
         initListeners()
-        if (savedInstanceState == null) {
-            lifecycleScope.launch {
-                delay(100)
-                startPostponedEnterTransition()
-            }
-//            loadNextPage()
-        } else {
-            startPostponedEnterTransition()
-        }
+        startAction(savedInstanceState)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun startAction(savedInstanceState: Bundle?) {
+        if (savedInstanceState == null) {
+            lifecycleScope.launch {
+                delay(100)
+                startPostponedEnterTransition()
+            }
+        } else {
+            startPostponedEnterTransition()
+        }
     }
 
     private fun setupToolbar() {
@@ -89,25 +93,13 @@ class ListMatchesFragment : Fragment() {
         toolbar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.menu_change_view_type -> {
-                    listMatchesViewModel.updateState {
-                        it.copy(
-                            layoutManagerViewType = when (it.layoutManagerViewType) {
-                                VIEW_TYPE_GRID -> {
-                                    menuItem.icon = AppCompatResources.getDrawable(
-                                        requireContext(),
-                                        R.drawable.ic_columns_24
-                                    )
-                                    VIEW_TYPE_LIST
-                                }
-                                VIEW_TYPE_LIST -> {
-                                    menuItem.icon = AppCompatResources.getDrawable(
-                                        requireContext(),
-                                        R.drawable.ic_rows_24
-                                    )
-                                    VIEW_TYPE_GRID
-                                }
-                            }
-                        )
+                    lifecycleScope.launch {
+                        listMatchesViewModel.userIntent.send(ListMatchesIntent.ToggleLayoutManagerState { drawable ->
+                            menuItem.icon = AppCompatResources.getDrawable(
+                                requireContext(),
+                                drawable
+                            )
+                        })
                     }
                     true
                 }
@@ -120,41 +112,44 @@ class ListMatchesFragment : Fragment() {
         }
     }
 
-    private fun observeSubmitListAdapter() {
+    private fun observeViewModel() {
         lifecycleScope.launch {
-            listMatchesViewModel.observeState(viewLifecycleOwner) {
-                matchListAdapter.submitList(it.listMatches)
-                when (it.layoutManagerViewType) {
-                    VIEW_TYPE_GRID -> {
-                        if (matchListAdapter.viewType != PaginationMatchListAdapter.VIEW_TYPE_GRID) {
-                            binding.matchListRv.post {
-
-                                (binding.matchListRv.layoutManager as GridLayoutManager).spanCount =
-                                    if (matchListAdapter.itemCount == 1
-                                        && matchListAdapter.currentList[0] == MatchInfo.MOCK) 1 else 2
-                                matchListAdapter.viewType =
-                                    PaginationMatchListAdapter.VIEW_TYPE_GRID
-                                refreshVisibleRecyclerViewItems(
-                                    matchListAdapter,
-                                    binding.matchListRv
-                                )
-                            }
+            listMatchesViewModel.layoutManagerState.collect {
+                when (it) {
+                    LayoutManagerState.ViewTypeGrid -> {
+                        binding.matchListRv.post {
+                            (binding.matchListRv.layoutManager as GridLayoutManager).spanCount =
+                                if (listMatchesViewModel.paginationListMatchesState.value.isEmpty) 1 else 2
+                            matchListAdapter.viewType =
+                                PaginationMatchListAdapter.VIEW_TYPE_GRID
+                            refreshVisibleRecyclerViewItems(
+                                matchListAdapter,
+                                binding.matchListRv
+                            )
                         }
                     }
-                    VIEW_TYPE_LIST -> {
-                        if (matchListAdapter.viewType != PaginationMatchListAdapter.VIEW_TYPE_LIST) {
-                            binding.matchListRv.post {
-                                (binding.matchListRv.layoutManager as GridLayoutManager).spanCount =
-                                    1
-                                matchListAdapter.viewType =
-                                    PaginationMatchListAdapter.VIEW_TYPE_LIST
-                                refreshVisibleRecyclerViewItems(
-                                    matchListAdapter,
-                                    binding.matchListRv
-                                )
-                            }
+                    LayoutManagerState.ViewTypeList -> {
+                        binding.matchListRv.post {
+                            (binding.matchListRv.layoutManager as GridLayoutManager).spanCount = 1
+                            matchListAdapter.viewType =
+                                PaginationMatchListAdapter.VIEW_TYPE_LIST
+                            refreshVisibleRecyclerViewItems(
+                                matchListAdapter,
+                                binding.matchListRv
+                            )
                         }
                     }
+                }
+            }
+        }
+        lifecycleScope.launch {
+            listMatchesViewModel.paginationListMatchesState.collect {
+                when (it) {
+                    is PaginationListMatchesState.Loading, is PaginationListMatchesState.NeedLoading, is PaginationListMatchesState.Finish -> {
+                        matchListAdapter.submitList(it.getPaginationMatchList())
+                    }
+                    is PaginationListMatchesState.Start -> {}
+                    is PaginationListMatchesState.Empty -> {}
                 }
             }
         }
@@ -162,18 +157,18 @@ class ListMatchesFragment : Fragment() {
 
     private fun setupRecyclerView() {
         matchListAdapter = PaginationMatchListAdapter().apply {
-            viewType = when (listMatchesViewModel.currentState.layoutManagerViewType) {
-                VIEW_TYPE_GRID -> PaginationMatchListAdapter.VIEW_TYPE_GRID
-                VIEW_TYPE_LIST -> PaginationMatchListAdapter.VIEW_TYPE_LIST
+            viewType = when (listMatchesViewModel.layoutManagerState.value) {
+                LayoutManagerState.ViewTypeGrid -> PaginationMatchListAdapter.VIEW_TYPE_GRID
+                LayoutManagerState.ViewTypeList -> PaginationMatchListAdapter.VIEW_TYPE_LIST
+            }
+        }
+        (binding.matchListRv.layoutManager as GridLayoutManager).apply {
+            spanCount = when (listMatchesViewModel.layoutManagerState.value) {
+                LayoutManagerState.ViewTypeGrid -> 2
+                LayoutManagerState.ViewTypeList -> 1
             }
         }
         binding.matchListRv.adapter = matchListAdapter
-        (binding.matchListRv.layoutManager as GridLayoutManager).apply {
-            spanCount = when (listMatchesViewModel.currentState.layoutManagerViewType) {
-                VIEW_TYPE_GRID -> 2
-                VIEW_TYPE_LIST -> 1
-            }
-        }
         binding.matchListRv.recycledViewPool.setMaxRecycledViews(
             PaginationMatchListAdapter.VIEW_TYPE_LOADING,
             PaginationMatchListAdapter.LOADING_POOL_SIZE
@@ -187,21 +182,21 @@ class ListMatchesFragment : Fragment() {
                 loadNextPage()
             }
 
-            override fun isLastPage(): Boolean {
-                return listMatchesViewModel.currentState.isLastPage
+            override fun isFinish(): Boolean {
+                return listMatchesViewModel.paginationListMatchesState.value.isFinish
+            }
+
+            override fun isNeedLoading(): Boolean {
+                return listMatchesViewModel.paginationListMatchesState.value.isNeedLoading
             }
 
             override fun isLoading(): Boolean {
-                return listMatchesViewModel.currentState.isLoading
-            }
-
-            override fun isLoadingPage(): Boolean {
-                return listMatchesViewModel.currentState.isLoadingPage
+                return listMatchesViewModel.paginationListMatchesState.value.isLoading
             }
         }
         binding.matchListRv.addOnScrollListener(paginationScrollListener)
         matchListAdapter.isLoadingAddedListener =
-            { listMatchesViewModel.currentState.isLoading }
+            { listMatchesViewModel.paginationListMatchesState.value.isNeedLoading || listMatchesViewModel.paginationListMatchesState.value.isLoading }
     }
 
     private fun navigateToMatchDetailFragment(matchNumber: Int) {
@@ -211,26 +206,38 @@ class ListMatchesFragment : Fragment() {
     }
 
     private fun navigateToSearchListMatchesFragment() {
-        val action =
-            ListMatchesFragmentDirections.actionListMatchesFragmentToSearchListMatchesFragment()
-        navController.navigate(action)
+        if(navController.currentDestination?.id == R.id.listMatchesFragment){
+            val action =
+                ListMatchesFragmentDirections.actionListMatchesFragmentToSearchListMatchesFragment()
+            navController.navigate(action)
+        }
     }
 
     private fun initListeners() {
         binding.matchInfoListUpSrl.setOnRefreshListener {
             lifecycleScope.launch {
-                listMatchesViewModel.resetPaginationListHolder {
+                listMatchesViewModel.userIntent.send(ListMatchesIntent.ResetPaginationListHolder {
                     loadNextPage()
                     binding.matchInfoListUpSrl.isRefreshing = false
-                }
+                })
             }
         }
     }
 
     private fun loadNextPage() {
-        listMatchesViewModel.loadNextPage {
-            Log.d("ListMatchesFragment", it)
-            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            listMatchesViewModel.userIntent.send(ListMatchesIntent.LoadNextPage {
+                when (it) {
+                    ErrorType.Unknown -> {
+                        Log.d("ListMatchesFragment", getString(R.string.unknown_error_text))
+                        Toast.makeText(
+                            context,
+                            getString(R.string.unknown_error_text),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            })
         }
     }
 

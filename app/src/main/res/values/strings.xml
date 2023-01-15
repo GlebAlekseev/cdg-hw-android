@@ -7,4 +7,7 @@
     <string name="search_text">Поиск</string>
     <string name="not_found_text">Ничего не найдено</string>
     <string name="base_url">https://fixturedownload.com/</string>
+
+    <string name="unknown_error_text">Ошибка получения данных. Используется кеш.</string>
+    <string name="error_text">Ошибка</string>
 </resources>

@@ -24,8 +24,8 @@
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
-                matchNumber="@{matchDetailViewModel.state.matchInfo.matchNumber}"
-                roundNumber="@{matchDetailViewModel.state.matchInfo.roundNumber}"
+                matchNumber="@{matchDetailViewModel.state.toMatchInfo().matchNumber}"
+                roundNumber="@{matchDetailViewModel.state.toMatchInfo().roundNumber}"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:navigationIcon="?attr/homeAsUpIndicator"
@@ -57,7 +57,7 @@
 
                     <TextView
                         android:id="@+id/hour_minute_tv"
-                        hourMinuteAsText="@{matchDetailViewModel.state.matchInfo.dateUtc}"
+                        hourMinuteAsText="@{matchDetailViewModel.state.toMatchInfo().dateUtc}"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAlignment="center"
@@ -69,7 +69,7 @@
 
                     <TextView
                         android:id="@+id/day_month_year_tv"
-                        dayMonthYearAsText="@{matchDetailViewModel.state.matchInfo.dateUtc}"
+                        dayMonthYearAsText="@{matchDetailViewModel.state.toMatchInfo().dateUtc}"
                         android:layout_width="180dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_small"
@@ -82,8 +82,8 @@
 
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/textView2"
-                        awayTeamScore="@{matchDetailViewModel.state.matchInfo.awayTeamScore}"
-                        homeTeamScore="@{matchDetailViewModel.state.matchInfo.homeTeamScore}"
+                        awayTeamScore="@{matchDetailViewModel.state.toMatchInfo().awayTeamScore}"
+                        homeTeamScore="@{matchDetailViewModel.state.toMatchInfo().homeTeamScore}"
                         isHome="@{true}"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -95,8 +95,8 @@
                         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.DetailMaterialCardView.Right">
 
                         <TextView
-                            awayTeamScore="@{matchDetailViewModel.state.matchInfo.awayTeamScore}"
-                            homeTeamScore="@{matchDetailViewModel.state.matchInfo.homeTeamScore}"
+                            awayTeamScore="@{matchDetailViewModel.state.toMatchInfo().awayTeamScore}"
+                            homeTeamScore="@{matchDetailViewModel.state.toMatchInfo().homeTeamScore}"
                             isHome="@{true}"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
@@ -123,8 +123,8 @@
 
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/textView7"
-                        awayTeamScore="@{matchDetailViewModel.state.matchInfo.awayTeamScore}"
-                        homeTeamScore="@{matchDetailViewModel.state.matchInfo.homeTeamScore}"
+                        awayTeamScore="@{matchDetailViewModel.state.toMatchInfo().awayTeamScore}"
+                        homeTeamScore="@{matchDetailViewModel.state.toMatchInfo().homeTeamScore}"
                         isHome="@{false}"
                         android:layout_width="wrap_content"
                         android:layout_height="0dp"
@@ -135,8 +135,8 @@
                         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.DetailMaterialCardView.Left">
 
                         <TextView
-                            awayTeamScore="@{matchDetailViewModel.state.matchInfo.awayTeamScore}"
-                            homeTeamScore="@{matchDetailViewModel.state.matchInfo.homeTeamScore}"
+                            awayTeamScore="@{matchDetailViewModel.state.toMatchInfo().awayTeamScore}"
+                            homeTeamScore="@{matchDetailViewModel.state.toMatchInfo().homeTeamScore}"
                             isHome="@{false}"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -153,7 +153,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_huge"
-                        android:text="@{matchDetailViewModel.state.matchInfo.location}"
+                        android:text="@{matchDetailViewModel.state.toMatchInfo().location}"
                         android:textAlignment="center"
                         android:textAppearance="@style/TextAppearance.DetailContent.Small"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -164,8 +164,8 @@
 
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/materialCardView"
-                        awayTeamScore="@{matchDetailViewModel.state.matchInfo.awayTeamScore}"
-                        homeTeamScore="@{matchDetailViewModel.state.matchInfo.homeTeamScore}"
+                        awayTeamScore="@{matchDetailViewModel.state.toMatchInfo().awayTeamScore}"
+                        homeTeamScore="@{matchDetailViewModel.state.toMatchInfo().homeTeamScore}"
                         isHome="@{true}"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -181,7 +181,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:text="@{matchDetailViewModel.state.matchInfo.homeTeam}"
+                            android:text="@{matchDetailViewModel.state.toMatchInfo().homeTeam}"
                             android:textAlignment="center"
                             android:textAppearance="@style/TextAppearance.DetailContent.Small"
                             tools:text="Brentford " />
@@ -190,8 +190,8 @@
 
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/materialCardView3"
-                        awayTeamScore="@{matchDetailViewModel.state.matchInfo.awayTeamScore}"
-                        homeTeamScore="@{matchDetailViewModel.state.matchInfo.homeTeamScore}"
+                        awayTeamScore="@{matchDetailViewModel.state.toMatchInfo().awayTeamScore}"
+                        homeTeamScore="@{matchDetailViewModel.state.toMatchInfo().homeTeamScore}"
                         isHome="@{false}"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
@@ -206,7 +206,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:text="@{matchDetailViewModel.state.matchInfo.awayTeam}"
+                            android:text="@{matchDetailViewModel.state.toMatchInfo().awayTeam}"
                             android:textAlignment="center"
                             android:textAppearance="@style/TextAppearance.DetailContent.Small"
                             app:layout_constraintBottom_toBottomOf="@+id/textView7"

@@ -4,9 +4,9 @@ import androidx.lifecycle.asFlow
 import com.glebalekseevjk.premierleaguefixtures.data.local.dao.MatchInfoDao
 import com.glebalekseevjk.premierleaguefixtures.data.local.model.MatchInfoDbModel
 import com.glebalekseevjk.premierleaguefixtures.data.remote.MatchInfoService
+import com.glebalekseevjk.premierleaguefixtures.domain.entity.ErrorType
 import com.glebalekseevjk.premierleaguefixtures.domain.entity.MatchInfo
-import com.glebalekseevjk.premierleaguefixtures.domain.entity.Result
-import com.glebalekseevjk.premierleaguefixtures.domain.entity.ResultStatus
+import com.glebalekseevjk.premierleaguefixtures.domain.entity.ResultType
 import com.glebalekseevjk.premierleaguefixtures.domain.mapper.Mapper
 import com.glebalekseevjk.premierleaguefixtures.domain.repository.MatchInfoRepository
 import com.glebalekseevjk.premierleaguefixtures.domain.repository.MatchInfoRepository.Companion.TOTAL_PER_PAGE
@@ -23,33 +23,42 @@ class MatchInfoRepositoryImpl @Inject constructor(
     private val matchInfoDao: MatchInfoDao,
     private val mapper: Mapper<MatchInfo, MatchInfoDbModel>
 ) : MatchInfoRepository {
+    override fun getMatch(matchNumber: Int) =
+        matchInfoDao.get(matchNumber).asFlow()
+            .map {
+                if (it != null)
+                    ResultType.Success(mapper.mapDbModelToItem(it))
+                else ResultType.Failure<Nothing>(ErrorType.Unknown)
+            }
 
-    override fun getMatch(matchNumber: Int): Flow<MatchInfo?> =
-        matchInfoDao.get(matchNumber).asFlow().map { it?.let { mapper.mapDbModelToItem(it) } }
 
     override suspend fun searchTeamNamePagedMatchInfoList(
         teamName: String,
         page: Int
-    ): List<MatchInfo> {
-        return with(Dispatchers.IO){
-            matchInfoDao.searchTeamNamePagedMatchInfoList(
-                TOTAL_PER_PAGE,
-                page * TOTAL_PER_PAGE - TOTAL_PER_PAGE,
-                teamName
-            ).map { mapper.mapDbModelToItem(it) }
+    ): ResultType<List<MatchInfo>> {
+        return with(Dispatchers.IO) {
+            ResultType.Success(
+                matchInfoDao.searchTeamNamePagedMatchInfoList(
+                    TOTAL_PER_PAGE,
+                    page * TOTAL_PER_PAGE - TOTAL_PER_PAGE,
+                    teamName
+                ).map { mapper.mapDbModelToItem(it) }
+            )
         }
     }
 
-    override fun getMatchListRangeForPage(page: Int): Flow<Result<List<MatchInfo>>> =
+
+    override fun getMatchListRangeForPage(page: Int): Flow<ResultType<List<MatchInfo>>> =
         getMatchListRangeForPageFromNetwork(page).map {
-            when (it.status) {
-                ResultStatus.SUCCESS -> {
+            var errorType: ErrorType? = null
+            when (it) {
+                is ResultType.Failure<*> -> errorType = it.errorType
+                is ResultType.Loading -> return@map it
+                is ResultType.Success -> {
                     // добавляю с заменой существующих в хранилище. patch
                     val newList = it.data
                     matchInfoDao.addAll(*newList.map { mapper.mapItemToDbModel(it) }.toTypedArray())
                 }
-                ResultStatus.LOADING -> return@map it
-                ResultStatus.FAILURE -> {}
             }
 
             // Получение данных из локального хранилища. cache
@@ -57,46 +66,43 @@ class MatchInfoRepositoryImpl @Inject constructor(
                 TOTAL_PER_PAGE,
                 page * TOTAL_PER_PAGE - TOTAL_PER_PAGE
             ).map { mapper.mapDbModelToItem(it) }
-
-            return@map Result(it.status, list)
+            return@map if (errorType != null) ResultType.Failure(errorType, list) else
+                ResultType.Success(list)
         }.flowOn(Dispatchers.IO)
 
-    private fun getMatchListRangeForPageFromNetwork(page: Int): Flow<Result<List<MatchInfo>>> =
+    private fun getMatchListRangeForPageFromNetwork(page: Int): Flow<ResultType<List<MatchInfo>>> =
         flow {
-            emit(Result(ResultStatus.LOADING, emptyList()))
+            emit(ResultType.Loading)
+
             val matchInfoListResponse = runCatching {
                 matchInfoService.getTodoList().execute()
             }.getOrNull()
+
             val result = getResultFromMatchInfoListResponse(matchInfoListResponse)
-            when (result.status) {
-                ResultStatus.SUCCESS -> emit(
-                    Result(
-                        ResultStatus.SUCCESS,
-                        getRangeListForPage(result.data, page)
-                    )
-                )
-                else -> emit(result)
+            when (result) {
+                is ResultType.Failure<*> -> emit(ResultType.Failure<Nothing>(ErrorType.Unknown))
+                is ResultType.Loading -> {}
+                is ResultType.Success -> {
+                    emit(ResultType.Success(getRangeListForPage(result.data, page)))
+                }
             }
         }.flowOn(Dispatchers.IO)
 
-    private fun getResultFromMatchInfoListResponse(response: Response<List<MatchInfo>>?): Result<List<MatchInfo>> {
-        var status = ResultStatus.SUCCESS
-        var data = emptyList<MatchInfo>()
+    private fun getResultFromMatchInfoListResponse(response: Response<List<MatchInfo>>?): ResultType<List<MatchInfo>> {
         response?.code().let {
             when (it) {
                 200 -> {}
                 else -> {
-                    status = ResultStatus.FAILURE
+                    return ResultType.Failure<Nothing>(ErrorType.Unknown)
                 }
             }
         }
         val list = response?.body()
-        if (list == null) {
-            status = ResultStatus.FAILURE
+        return if (list == null) {
+            ResultType.Failure<Nothing>(ErrorType.Unknown)
         } else {
-            data = list
+            ResultType.Success(list)
         }
-        return Result(status, data)
     }
 
     private fun <T> getRangeListForPage(list: List<T>, page: Int): List<T> {
