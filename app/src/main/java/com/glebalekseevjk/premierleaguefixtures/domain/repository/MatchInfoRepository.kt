@@ -1,15 +1,19 @@
 package com.glebalekseevjk.premierleaguefixtures.domain.repository
 
 import com.glebalekseevjk.premierleaguefixtures.domain.entity.MatchInfo
-import com.glebalekseevjk.premierleaguefixtures.domain.entity.ResultType
+import com.glebalekseevjk.premierleaguefixtures.domain.entity.Resource
 import kotlinx.coroutines.flow.Flow
 
 interface MatchInfoRepository {
-    fun getMatchListRangeForPage(page: Int): Flow<ResultType<List<MatchInfo>>>
-    fun getMatch(matchNumber: Int): Flow<ResultType<MatchInfo>>
-    suspend fun searchTeamNamePagedMatchInfoList(teamName: String, page: Int): ResultType<List<MatchInfo>>
+    suspend fun getMatchListRangeForPageLocal(page: Int): Resource<List<MatchInfo>>
+    suspend fun getMatchListRangeForPageRemote(page: Int): Resource<List<MatchInfo>>
+    suspend fun getMatch(matchNumber: Int): Resource<MatchInfo>
+    suspend fun searchTeamNamePagedMatchInfoList(
+        teamName: String,
+        page: Int
+    ): Resource<List<MatchInfo>>
 
     companion object {
-        const val TOTAL_PER_PAGE = 8
+        const val TOTAL_PER_PAGE = 16
     }
 }

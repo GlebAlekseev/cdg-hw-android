@@ -1,20 +1,15 @@
 package com.glebalekseevjk.premierleaguefixtures.data.repository
 
-import androidx.lifecycle.asFlow
 import com.glebalekseevjk.premierleaguefixtures.data.local.dao.MatchInfoDao
 import com.glebalekseevjk.premierleaguefixtures.data.local.model.MatchInfoDbModel
 import com.glebalekseevjk.premierleaguefixtures.data.remote.MatchInfoService
-import com.glebalekseevjk.premierleaguefixtures.domain.entity.ErrorType
 import com.glebalekseevjk.premierleaguefixtures.domain.entity.MatchInfo
-import com.glebalekseevjk.premierleaguefixtures.domain.entity.ResultType
+import com.glebalekseevjk.premierleaguefixtures.domain.entity.Resource
 import com.glebalekseevjk.premierleaguefixtures.domain.mapper.Mapper
 import com.glebalekseevjk.premierleaguefixtures.domain.repository.MatchInfoRepository
 import com.glebalekseevjk.premierleaguefixtures.domain.repository.MatchInfoRepository.Companion.TOTAL_PER_PAGE
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
+import retrofit2.HttpException
 import retrofit2.Response
 import javax.inject.Inject
 
@@ -23,85 +18,83 @@ class MatchInfoRepositoryImpl @Inject constructor(
     private val matchInfoDao: MatchInfoDao,
     private val mapper: Mapper<MatchInfo, MatchInfoDbModel>
 ) : MatchInfoRepository {
-    override fun getMatch(matchNumber: Int) =
-        matchInfoDao.get(matchNumber).asFlow()
-            .map {
-                if (it != null)
-                    ResultType.Success(mapper.mapDbModelToItem(it))
-                else ResultType.Failure<Nothing>(ErrorType.Unknown)
-            }
-
+    override suspend fun getMatch(matchNumber: Int): Resource<MatchInfo> = with(Dispatchers.IO) {
+        val result = matchInfoDao.get(matchNumber)
+        if (result == null) {
+            Resource.Failure<Nothing>(NoSuchElementException())
+        } else {
+            Resource.Success(mapper.mapDbModelToItem(result))
+        }
+    }
 
     override suspend fun searchTeamNamePagedMatchInfoList(
         teamName: String,
         page: Int
-    ): ResultType<List<MatchInfo>> {
-        return with(Dispatchers.IO) {
-            ResultType.Success(
-                matchInfoDao.searchTeamNamePagedMatchInfoList(
-                    TOTAL_PER_PAGE,
-                    page * TOTAL_PER_PAGE - TOTAL_PER_PAGE,
-                    teamName
-                ).map { mapper.mapDbModelToItem(it) }
-            )
-        }
+    ): Resource<List<MatchInfo>> = with(Dispatchers.IO) {
+        Resource.Success(
+            matchInfoDao.searchTeamNamePagedMatchInfoList(
+                TOTAL_PER_PAGE,
+                page * TOTAL_PER_PAGE - TOTAL_PER_PAGE,
+                teamName
+            ).map { mapper.mapDbModelToItem(it) }
+        )
     }
 
-
-    override fun getMatchListRangeForPage(page: Int): Flow<ResultType<List<MatchInfo>>> =
-        getMatchListRangeForPageFromNetwork(page).map {
-            var errorType: ErrorType? = null
-            when (it) {
-                is ResultType.Failure<*> -> errorType = it.errorType
-                is ResultType.Loading -> return@map it
-                is ResultType.Success -> {
-                    // добавляю с заменой существующих в хранилище. patch
-                    val newList = it.data
-                    matchInfoDao.addAll(*newList.map { mapper.mapItemToDbModel(it) }.toTypedArray())
-                }
-            }
-
-            // Получение данных из локального хранилища. cache
-            val list = matchInfoDao.getPagedMatchInfoList(
+    override suspend fun getMatchListRangeForPageLocal(page: Int): Resource<List<MatchInfo>> =
+        with(Dispatchers.IO) {
+            return@with Resource.Success(matchInfoDao.getPagedMatchInfoList(
                 TOTAL_PER_PAGE,
                 page * TOTAL_PER_PAGE - TOTAL_PER_PAGE
-            ).map { mapper.mapDbModelToItem(it) }
-            return@map if (errorType != null) ResultType.Failure(errorType, list) else
-                ResultType.Success(list)
-        }.flowOn(Dispatchers.IO)
+            ).map { mapper.mapDbModelToItem(it) })
+        }
 
-    private fun getMatchListRangeForPageFromNetwork(page: Int): Flow<ResultType<List<MatchInfo>>> =
-        flow {
-            emit(ResultType.Loading)
-
-            val matchInfoListResponse = runCatching {
-                matchInfoService.getTodoList().execute()
-            }.getOrNull()
-
-            val result = getResultFromMatchInfoListResponse(matchInfoListResponse)
+    override suspend fun getMatchListRangeForPageRemote(page: Int): Resource<List<MatchInfo>> =
+        with(Dispatchers.IO) {
+            val result = getMatchListRangeForPageFromNetwork(page)
             when (result) {
-                is ResultType.Failure<*> -> emit(ResultType.Failure<Nothing>(ErrorType.Unknown))
-                is ResultType.Loading -> {}
-                is ResultType.Success -> {
-                    emit(ResultType.Success(getRangeListForPage(result.data, page)))
+                is Resource.Success -> {
+                    try {
+                        val newList = result.data
+                        matchInfoDao.addAll(*newList.map { mapper.mapItemToDbModel(it) }
+                            .toTypedArray())
+                    } catch (e: Exception) {
+                        return@with Resource.Failure(e)
+                    }
                 }
+                else -> {}
             }
-        }.flowOn(Dispatchers.IO)
+            return@with result
+        }
 
-    private fun getResultFromMatchInfoListResponse(response: Response<List<MatchInfo>>?): ResultType<List<MatchInfo>> {
-        response?.code().let {
+    private suspend fun getMatchListRangeForPageFromNetwork(page: Int): Resource<List<MatchInfo>> =
+        with(Dispatchers.IO) {
+            try {
+                val matchInfoListResponse = matchInfoService.getTodoList()
+                val result = getResultFromMatchInfoListResponse(matchInfoListResponse)
+                return@with when (result) {
+                    is Resource.Failure<*> -> result
+                    is Resource.Success -> Resource.Success(getRangeListForPage(result.data, page))
+                }
+            } catch (e: Exception) {
+                return@with Resource.Failure(e)
+            }
+        }
+
+
+    private fun getResultFromMatchInfoListResponse(response: Response<List<MatchInfo>>): Resource<List<MatchInfo>> {
+        response.code().let {
             when (it) {
                 200 -> {}
                 else -> {
-                    return ResultType.Failure<Nothing>(ErrorType.Unknown)
+                    return Resource.Failure<Nothing>(HttpException(response))
                 }
             }
         }
-        val list = response?.body()
+        val list = response.body()
         return if (list == null) {
-            ResultType.Failure<Nothing>(ErrorType.Unknown)
+            Resource.Failure<Nothing>(NullPointerException())
         } else {
-            ResultType.Success(list)
+            Resource.Success(list)
         }
     }
 
@@ -109,7 +102,6 @@ class MatchInfoRepositoryImpl @Inject constructor(
         val start = TOTAL_PER_PAGE * page - TOTAL_PER_PAGE
         var end = TOTAL_PER_PAGE * page - 1
         if (end >= list.size) end = list.size - 1
-        val newList = list.subList(start, end + 1)
-        return newList
+        return list.subList(start, end + 1)
     }
 }
