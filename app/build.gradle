@@ -46,7 +46,7 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
 
-    // navigation
+    // Navigation
     def nav_version = "2.5.3"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
@@ -73,10 +73,15 @@ dependencies {
     // Room
     def room_version = "2.4.3"
     implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
 
-    // dagger 2
+    // Dagger 2
     def dagger_version = "2.43"
     implementation "com.google.dagger:dagger:$dagger_version"
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
+
+    // Paging
+    def paging_version = "3.1.1"
+    implementation "androidx.paging:paging-runtime:$paging_version"
 }

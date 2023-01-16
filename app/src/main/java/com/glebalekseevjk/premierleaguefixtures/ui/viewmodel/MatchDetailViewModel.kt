@@ -1,22 +1,29 @@
 package com.glebalekseevjk.premierleaguefixtures.ui.viewmodel
 
-import androidx.lifecycle.asLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.glebalekseevjk.premierleaguefixtures.R
+import com.glebalekseevjk.premierleaguefixtures.domain.entity.Resource
 import com.glebalekseevjk.premierleaguefixtures.domain.interactor.MatchInfoUseCase
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.MatchDetailState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class MatchDetailViewModel @Inject constructor(
     private val matchInfoUseCase: MatchInfoUseCase
-) : BaseViewModel<MatchDetailState>(MatchDetailState()) {
+) : ViewModel() {
+    private val _state = MutableStateFlow<MatchDetailState>(MatchDetailState.Loading)
+    val state: StateFlow<MatchDetailState>
+        get() = _state
 
     fun setCurrentMatchInfo(matchNumber: Int) {
-        subscribeOnDataSource(
-            matchInfoUseCase.getMatch(matchNumber).asLiveData()
-        ) { response, state ->
-            state.copy(
-                matchInfo = response
-                    ?: throw RuntimeException("Attempt to get a non-existent element")
-            )
+        viewModelScope.launch {
+            when (val result = matchInfoUseCase.getMatch(matchNumber)) {
+                is Resource.Failure -> _state.value = MatchDetailState.Error(R.string.error_text)
+                is Resource.Success -> _state.value = MatchDetailState.Loaded(result.data)
+            }
         }
     }
 }

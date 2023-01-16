@@ -5,15 +5,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.glebalekseevjk.premierleaguefixtures.R
 import com.glebalekseevjk.premierleaguefixtures.appComponent
 import com.glebalekseevjk.premierleaguefixtures.databinding.FragmentMatchDetailBinding
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.MatchDetailViewModel
+import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.MatchDetailState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,7 +37,7 @@ class MatchDetailFragment : Fragment() {
         super.onAttach(context)
         context.appComponent.createMatchDetailFragmentSubcomponent().inject(this)
     }
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         matchDetailViewModel =
             ViewModelProvider(this, viewModelFactory)[MatchDetailViewModel::class.java]
@@ -53,13 +56,10 @@ class MatchDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         postponeEnterTransition()
         super.onViewCreated(view, savedInstanceState)
+        initDataBinding()
         initToolBar()
-        binding.matchDetailViewModel = matchDetailViewModel
-        binding.lifecycleOwner = viewLifecycleOwner
-        lifecycleScope.launch {
-            delay(100)
-            startPostponedEnterTransition()
-        }
+        observeViewModel()
+        startAction()
     }
 
     override fun onDestroyView() {
@@ -71,9 +71,38 @@ class MatchDetailFragment : Fragment() {
         matchDetailViewModel.setCurrentMatchInfo(args.matchNumber)
     }
 
+    private fun initDataBinding() {
+        binding.matchDetailViewModel = matchDetailViewModel
+        binding.lifecycleOwner = viewLifecycleOwner
+    }
+
     private fun initToolBar() {
         binding.toolbar.setNavigationOnClickListener {
             navController.popBackStack()
+        }
+    }
+
+    private fun observeViewModel() {
+        lifecycleScope.launch {
+            matchDetailViewModel.state.collect {
+                when (it) {
+                    is MatchDetailState.Error<*> -> {
+                        Toast.makeText(
+                            requireContext(),
+                            getString(it.errorMessage as? Int ?: R.string.error_text),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
+    private fun startAction() {
+        lifecycleScope.launch {
+            delay(100)
+            startPostponedEnterTransition()
         }
     }
 }

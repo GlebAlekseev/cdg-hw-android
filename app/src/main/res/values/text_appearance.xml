@@ -28,6 +28,13 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <style name="TextAppearance.ListItem.NotFound" parent="Base.TextAppearance">
+        <item name="android:textColor">?attr/colorOnSecondary</item>
+        <item name="android:textSize">26sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+
     <style name="TextAppearance.DetailContent.Small" parent="Base.TextAppearance">
         <item name="android:textColor">?attr/colorOnPrimary</item>
         <item name="android:textSize">20sp</item>

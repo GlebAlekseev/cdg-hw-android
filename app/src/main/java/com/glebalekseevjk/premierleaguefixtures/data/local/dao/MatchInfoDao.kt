@@ -7,11 +7,18 @@ import com.glebalekseevjk.premierleaguefixtures.data.local.model.MatchInfoDbMode
 @Dao
 interface MatchInfoDao {
     @Query("SELECT * FROM MatchInfoDbModel WHERE matchNumber = :matchNumber")
-    fun get(matchNumber: Int): LiveData<MatchInfoDbModel?>
+    suspend fun get(matchNumber: Int): MatchInfoDbModel?
 
     @Query("SELECT * FROM MatchInfoDbModel LIMIT :limit OFFSET :offset")
-    fun getPagedMatchInfoList(limit: Int, offset: Int): List<MatchInfoDbModel>
+    suspend fun getPagedMatchInfoList(limit: Int, offset: Int): List<MatchInfoDbModel>
+
+    @Query("SELECT * FROM MatchInfoDbModel WHERE HomeTeam || AwayTeam LIKE '%' || :requestText  || '%' LIMIT :limit OFFSET :offset")
+    suspend fun searchTeamNamePagedMatchInfoList(
+        limit: Int,
+        offset: Int,
+        requestText: String
+    ): List<MatchInfoDbModel>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun addAll(vararg todoList: MatchInfoDbModel)
+    suspend fun addAll(vararg todoList: MatchInfoDbModel)
 }
