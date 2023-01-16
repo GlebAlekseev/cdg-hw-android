@@ -44,4 +44,9 @@
         <item name="android:textColor">?attr/colorOnPrimary</item>
         <item name="android:textColorHint">?attr/colorOnPrimary</item>
     </style>
+
+    <style name="CustomButton" parent="Widget.AppCompat.Button">
+        <item name="android:textColor">?attr/colorOnPrimary</item>
+        <item name="android:textColorHint">?attr/colorOnPrimary</item>
+    </style>
 </resources>

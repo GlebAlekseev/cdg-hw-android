@@ -19,14 +19,12 @@
         <action
             android:id="@+id/action_listMatchesFragment_to_searchListMatchesFragment"
             app:destination="@id/searchListMatchesFragment"
-            app:popEnterAnim="@anim/fade_in"
-            app:popExitAnim="@anim/fade_out"
             app:enterAnim="@anim/fade_in"
             app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out"
             app:popUpTo="@id/listMatchesFragment" />
     </fragment>
-<!--    app:enterAnim="@anim/slide_in_bottom"-->
-<!--    app:exitAnim="@anim/slide_out_bottom"-->
     <fragment
         android:id="@+id/matchDetailFragment"
         android:name="com.glebalekseevjk.premierleaguefixtures.ui.fragment.MatchDetailFragment"
@@ -38,7 +36,7 @@
     <fragment
         android:id="@+id/searchListMatchesFragment"
         android:name="com.glebalekseevjk.premierleaguefixtures.ui.fragment.SearchListMatchesFragment"
-        android:label="SearchListMatchesFragment" >
+        android:label="SearchListMatchesFragment">
         <action
             android:id="@+id/action_searchListMatchesFragment_to_matchDetailFragment"
             app:destination="@id/matchDetailFragment"
