@@ -7,8 +7,8 @@ sealed class MatchDetailState {
     data class Loaded(val matchInfo: MatchInfo) : MatchDetailState()
     data class Error<T>(val errorMessage: T) : MatchDetailState()
 
-    fun toMatchInfo(): MatchInfo{
-        return when(this){
+    fun toMatchInfo(): MatchInfo {
+        return when (this) {
             is Loaded -> matchInfo
             else -> MatchInfo.MOCK
         }
