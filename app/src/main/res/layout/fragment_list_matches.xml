@@ -4,6 +4,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+
+        <variable
+            name="listMatchesViewModel"
+            type="com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.ListMatchesViewModel" />
+
+        <import type="android.view.View" />
+    </data>
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -28,6 +37,24 @@
                 tools:menu="@menu/match_list_menu" />
         </com.google.android.material.appbar.AppBarLayout>
 
+        <FrameLayout
+            android:id="@+id/progress_frame"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/spacing_small"
+            android:background="@android:color/transparent"
+            android:visibility="@{ listMatchesViewModel.listMatchesState.isStart() ? View.VISIBLE : View.GONE}"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
+            <ProgressBar
+                android:id="@+id/pagination_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:indeterminateTint="?attr/colorPrimary" />
+        </FrameLayout>
+
+
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/match_info_list_up_srl"
             android:layout_width="match_parent"
@@ -37,11 +64,39 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/match_list_rv"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="@{listMatchesViewModel.listMatchesState.isNotFound() ? View.GONE : View.VISIBLE}"
                 app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                 tools:listitem="@layout/match_item_rv_list" />
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/not_found_frame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            android:orientation="vertical"
+            android:visibility="@{listMatchesViewModel.listMatchesState.isNotFound() ? View.VISIBLE : View.GONE}"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+            tools:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|center"
+                android:layout_marginTop="@dimen/spacing_mega"
+                android:text="@string/not_found_text"
+                android:textAppearance="@style/TextAppearance.ListItem.NotFound" />
+
+            <Button
+                android:id="@+id/use_cache_btn"
+                style="@style/CustomButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|center"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:text="@string/use_cache_text" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

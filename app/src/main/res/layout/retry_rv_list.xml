@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorOnPrimary"
+        android:padding="@dimen/spacing_normal"
+        android:paddingVertical="@dimen/spacing_normal">
+
+        <TextView
+            android:id="@+id/textView9"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/unknown_error_text"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.ListItem.Medium"
+            app:layout_constraintBottom_toBottomOf="@+id/cache_btn"
+            app:layout_constraintEnd_toStartOf="@+id/retry_btn"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/retry_btn" />
+
+        <Button
+            android:id="@+id/retry_btn"
+            style="@style/CustomButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/retry_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/cache_btn"
+            style="@style/CustomButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/cache_text"
+            app:layout_constraintEnd_toEndOf="@+id/retry_btn"
+            app:layout_constraintStart_toStartOf="@+id/retry_btn"
+            app:layout_constraintTop_toBottomOf="@+id/retry_btn" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
