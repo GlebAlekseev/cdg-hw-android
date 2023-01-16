@@ -14,33 +14,36 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.glebalekseevjk.premierleaguefixtures.R
 import com.glebalekseevjk.premierleaguefixtures.appComponent
 import com.glebalekseevjk.premierleaguefixtures.databinding.FragmentListMatchesBinding
+import com.glebalekseevjk.premierleaguefixtures.databinding.FragmentSearchListMatchesBinding
 import com.glebalekseevjk.premierleaguefixtures.ui.custom.CustomSearchView
-import com.glebalekseevjk.premierleaguefixtures.ui.listener.PaginationScrollListener
-import com.glebalekseevjk.premierleaguefixtures.ui.rv.PaginationMatchListAdapter
+import com.glebalekseevjk.premierleaguefixtures.ui.rv.FooterAdapter
+import com.glebalekseevjk.premierleaguefixtures.ui.rv.MatchListAdapter
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.ListMatchesViewModel
+import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.SearchListMatchesViewModel
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.intent.ListMatchesIntent
+import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.intent.SearchListMatchesIntent
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.LayoutManagerState
-import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.PaginationListMatchesState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
 class SearchListMatchesFragment : Fragment() {
-    private var _binding: FragmentListMatchesBinding? = null
-    private val binding: FragmentListMatchesBinding
-        get() = _binding ?: throw RuntimeException("FragmentListMatchesBinding is null")
+    private var _binding: FragmentSearchListMatchesBinding? = null
+    private val binding: FragmentSearchListMatchesBinding
+        get() = _binding ?: throw RuntimeException("FragmentSearchListMatchesBinding is null")
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
-    private lateinit var listMatchesViewModel: ListMatchesViewModel
+    private lateinit var searchListMatchesViewModel: SearchListMatchesViewModel
 
-    private lateinit var matchListAdapter: PaginationMatchListAdapter
+    private lateinit var matchListAdapter: MatchListAdapter
     private val navController: NavController by lazy { findNavController() }
 
     override fun onAttach(context: Context) {
@@ -49,13 +52,8 @@ class SearchListMatchesFragment : Fragment() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        listMatchesViewModel =
-            ViewModelProvider(this, viewModelFactory)[ListMatchesViewModel::class.java]
-        if (savedInstanceState == null) {
-            lifecycleScope.launch {
-                listMatchesViewModel.userIntent.send(ListMatchesIntent.StopLoading)
-            }
-        }
+        searchListMatchesViewModel =
+            ViewModelProvider(this, viewModelFactory)[SearchListMatchesViewModel::class.java]
         super.onCreate(savedInstanceState)
     }
 
@@ -63,17 +61,17 @@ class SearchListMatchesFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentListMatchesBinding.inflate(inflater, container, false)
+        _binding = FragmentSearchListMatchesBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         postponeEnterTransition()
         super.onViewCreated(view, savedInstanceState)
-        setupToolbar(savedInstanceState)
+        initDataBinding()
         setupRecyclerView()
+        setupToolbar(savedInstanceState)
         observeViewModel()
-        initListeners()
         startAction(savedInstanceState)
     }
 
@@ -82,59 +80,116 @@ class SearchListMatchesFragment : Fragment() {
         _binding = null
     }
 
-    private fun startAction(savedInstanceState: Bundle?) {
-        if (savedInstanceState == null) {
-            lifecycleScope.launch {
-                delay(100)
-                startPostponedEnterTransition()
+    private fun initDataBinding() {
+        binding.searchListMatchesViewModel = searchListMatchesViewModel
+        binding.lifecycleOwner = viewLifecycleOwner
+    }
+
+    private fun setupRecyclerView() {
+        matchListAdapter = MatchListAdapter().apply {
+            viewType = when (searchListMatchesViewModel.layoutManagerState.value) {
+                LayoutManagerState.ViewTypeGrid -> MatchListAdapter.VIEW_TYPE_GRID
+                LayoutManagerState.ViewTypeList -> MatchListAdapter.VIEW_TYPE_LIST
             }
-        } else {
-            startPostponedEnterTransition()
         }
+        binding.matchListRv.adapter = matchListAdapter
+        with(binding.matchListRv.layoutManager as GridLayoutManager) {
+            spanCount = 2
+            spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                override fun getSpanSize(position: Int): Int {
+                    return when (matchListAdapter.getItemViewType(position)) {
+                        MatchListAdapter.VIEW_TYPE_GRID -> 1
+                        else -> 2
+                    }
+
+                }
+            }
+        }
+        matchListAdapter.openMatchDetailClickListener = { matchNumber ->
+            navigateToMatchDetailFragment(matchNumber)
+        }
+        matchListAdapter.addLoadStateListener {
+            lifecycleScope.launch {
+                when (it.refresh) {
+                    is LoadState.NotLoading -> {
+                        if (matchListAdapter.itemCount == 0) {
+                            searchListMatchesViewModel.userIntent.send(SearchListMatchesIntent.SetNotFoundState)
+                        } else {
+                            searchListMatchesViewModel.userIntent.send(SearchListMatchesIntent.SetIdleState)
+                        }
+                    }
+                    is LoadState.Loading -> {
+                        searchListMatchesViewModel.userIntent.send(SearchListMatchesIntent.SetLoading)
+                    }
+                    is LoadState.Error -> {
+                        if (matchListAdapter.itemCount == 0) {
+                            searchListMatchesViewModel.userIntent.send(SearchListMatchesIntent.SetNotFoundState)
+                        } else {
+                            searchListMatchesViewModel.userIntent.send(SearchListMatchesIntent.SetIdleState)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun navigateToMatchDetailFragment(matchNumber: Int) {
+        if (checkCurrentDestination()) {
+            val action =
+                SearchListMatchesFragmentDirections.actionSearchListMatchesFragmentToMatchDetailFragment(
+                    matchNumber
+                )
+            navController.navigate(action)
+        }
+    }
+
+    private fun checkCurrentDestination(): Boolean {
+        return navController.currentDestination?.id == R.id.searchListMatchesFragment
     }
 
     private fun setupToolbar(savedInstanceState: Bundle?) {
         val toolbar = binding.toolbar
         toolbar.inflateMenu(R.menu.match_search_list_menu)
         val searchViewMenuItem = toolbar.menu.findItem(R.id.menu_search)
-        val customSearchView = searchViewMenuItem.actionView as CustomSearchView
-        customSearchView.setOnSearchViewCollapsedListener {
-            navController.popBackStack()
-        }
-        customSearchView.setOnQueryTextFocusChangeListener { view, hasFocus ->
-            if (savedInstanceState == null) {
-                if (hasFocus) {
-                    openKeyBoard(view.findFocus())
-                }
+        with(searchViewMenuItem.actionView as CustomSearchView) {
+            setOnSearchViewCollapsedListener {
+                navController.popBackStack()
             }
-        }
-        customSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                return false
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                if (newText != null && newText != "" && newText != listMatchesViewModel.paginationListMatchesState.value.getTeamName()) {
-                    lifecycleScope.launch {
-                        listMatchesViewModel.userIntent.send(
-                            ListMatchesIntent.ResetPaginationListHolder(
-                                newText.trim()
-                            ) {
-                                lifecycleScope.launch{
-                                    listMatchesViewModel.userIntent.send(ListMatchesIntent.LoadNextPageFromLocalForRequest)
-                                }
-                            })
+            setOnQueryTextFocusChangeListener { view, hasFocus ->
+                if (savedInstanceState == null) {
+                    if (hasFocus) {
+                        openKeyBoard(view.findFocus())
                     }
                 }
-                return true
             }
-        })
+            setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    return false
+                }
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    newText?.let {
+                        if (it.isNotEmpty() && it != searchListMatchesViewModel.teamName.value) {
+                            lifecycleScope.launch {
+                                searchListMatchesViewModel.userIntent.send(
+                                    SearchListMatchesIntent.SetTeamName(
+                                        newText
+                                    )
+                                )
+                                matchListAdapter.refresh()
+                            }
+                        }
+                    }
+                    return true
+                }
+            })
+        }
         searchViewMenuItem.expandActionView()
         toolbar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.menu_change_view_type -> {
                     lifecycleScope.launch {
-                        listMatchesViewModel.userIntent.send(ListMatchesIntent.ToggleLayoutManagerState { drawable ->
+                        searchListMatchesViewModel.userIntent.send(SearchListMatchesIntent.ToggleLayoutManagerState { drawable ->
                             menuItem.icon = AppCompatResources.getDrawable(
                                 requireContext(),
                                 drawable
@@ -151,16 +206,25 @@ class SearchListMatchesFragment : Fragment() {
         }
     }
 
+    private fun openKeyBoard(view: View) {
+        val inputMethodManager: InputMethodManager? =
+            ContextCompat.getSystemService(requireContext(), InputMethodManager::class.java)
+        inputMethodManager?.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+    }
+
     private fun observeViewModel() {
         lifecycleScope.launch {
-            listMatchesViewModel.layoutManagerState.collect {
+            searchListMatchesViewModel.pagingListMatches.collect {
+                matchListAdapter.submitData(it)
+            }
+        }
+        lifecycleScope.launch {
+            searchListMatchesViewModel.layoutManagerState.collect {
                 when (it) {
                     LayoutManagerState.ViewTypeGrid -> {
                         binding.matchListRv.post {
-                            (binding.matchListRv.layoutManager as GridLayoutManager).spanCount =
-                                if (listMatchesViewModel.paginationListMatchesState.value.isEmpty) 1 else 2
                             matchListAdapter.viewType =
-                                PaginationMatchListAdapter.VIEW_TYPE_GRID
+                                MatchListAdapter.VIEW_TYPE_GRID
                             refreshVisibleRecyclerViewItems(
                                 matchListAdapter,
                                 binding.matchListRv
@@ -169,9 +233,8 @@ class SearchListMatchesFragment : Fragment() {
                     }
                     LayoutManagerState.ViewTypeList -> {
                         binding.matchListRv.post {
-                            (binding.matchListRv.layoutManager as GridLayoutManager).spanCount = 1
                             matchListAdapter.viewType =
-                                PaginationMatchListAdapter.VIEW_TYPE_LIST
+                                MatchListAdapter.VIEW_TYPE_LIST
                             refreshVisibleRecyclerViewItems(
                                 matchListAdapter,
                                 binding.matchListRv
@@ -181,83 +244,10 @@ class SearchListMatchesFragment : Fragment() {
                 }
             }
         }
-        lifecycleScope.launch {
-            listMatchesViewModel.paginationListMatchesState.collect {
-                when (it) {
-                    is PaginationListMatchesState.Loading, is PaginationListMatchesState.NeedLoading, is PaginationListMatchesState.Finish -> {
-                        matchListAdapter.submitList(it.getPaginationMatchList())
-                    }
-                    is PaginationListMatchesState.Start -> {}
-                    is PaginationListMatchesState.Empty -> {}
-                }
-            }
-        }
-    }
-
-    private fun setupRecyclerView() {
-        matchListAdapter = PaginationMatchListAdapter().apply {
-            viewType = when (listMatchesViewModel.layoutManagerState.value) {
-                LayoutManagerState.ViewTypeGrid -> PaginationMatchListAdapter.VIEW_TYPE_GRID
-                LayoutManagerState.ViewTypeList -> PaginationMatchListAdapter.VIEW_TYPE_LIST
-            }
-        }
-        (binding.matchListRv.layoutManager as GridLayoutManager).apply {
-            spanCount = when (listMatchesViewModel.layoutManagerState.value) {
-                LayoutManagerState.ViewTypeGrid -> 2
-                LayoutManagerState.ViewTypeList -> 1
-            }
-        }
-        binding.matchListRv.adapter = matchListAdapter
-        binding.matchListRv.recycledViewPool.setMaxRecycledViews(
-            PaginationMatchListAdapter.VIEW_TYPE_LOADING,
-            PaginationMatchListAdapter.LOADING_POOL_SIZE
-        )
-        matchListAdapter.openMatchDetailClickListener = { matchNumber ->
-            navigateToMatchDetailFragment(matchNumber)
-        }
-        val paginationScrollListener = object :
-            PaginationScrollListener() {
-            override fun loadMoreItems() {
-                loadNextPage()
-            }
-
-            override fun isFinish(): Boolean {
-                return listMatchesViewModel.paginationListMatchesState.value.isFinish
-            }
-
-            override fun isNeedLoading(): Boolean {
-                return listMatchesViewModel.paginationListMatchesState.value.isNeedLoading
-            }
-
-            override fun isLoading(): Boolean {
-                return listMatchesViewModel.paginationListMatchesState.value.isLoading
-            }
-        }
-        binding.matchListRv.addOnScrollListener(paginationScrollListener)
-        matchListAdapter.isLoadingAddedListener =
-            { listMatchesViewModel.paginationListMatchesState.value.isNeedLoading || listMatchesViewModel.paginationListMatchesState.value.isLoading }
-    }
-
-    private fun navigateToMatchDetailFragment(matchNumber: Int) {
-        val action =
-            SearchListMatchesFragmentDirections.actionSearchListMatchesFragmentToMatchDetailFragment(
-                matchNumber
-            )
-        navController.navigate(action)
-    }
-
-    private fun initListeners() {
-        binding.matchInfoListUpSrl.isEnabled = false
-    }
-
-    private fun loadNextPage() {
-        lifecycleScope.launch{
-            listMatchesViewModel.userIntent.send(ListMatchesIntent.LoadNextPageFromLocalForRequest)
-        }
     }
 
     private fun refreshVisibleRecyclerViewItems(
-        adapter: PaginationMatchListAdapter,
+        adapter: MatchListAdapter,
         recyclerView: RecyclerView
     ) {
         val layoutManager = recyclerView.layoutManager as GridLayoutManager
@@ -269,9 +259,14 @@ class SearchListMatchesFragment : Fragment() {
         )
     }
 
-    private fun openKeyBoard(view: View) {
-        val inputMethodManager: InputMethodManager? =
-            ContextCompat.getSystemService(requireContext(), InputMethodManager::class.java)
-        inputMethodManager?.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+    private fun startAction(savedInstanceState: Bundle?) {
+        if (savedInstanceState == null) {
+            lifecycleScope.launch {
+                delay(100)
+                startPostponedEnterTransition()
+            }
+        } else {
+            startPostponedEnterTransition()
+        }
     }
 }
