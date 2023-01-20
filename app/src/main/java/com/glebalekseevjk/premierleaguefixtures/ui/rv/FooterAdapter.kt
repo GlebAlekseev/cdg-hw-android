@@ -1,7 +1,6 @@
 package com.glebalekseevjk.premierleaguefixtures.ui.rv
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
@@ -14,12 +13,10 @@ import com.glebalekseevjk.premierleaguefixtures.databinding.RetryRvListBinding
 
 class FooterAdapter(private val retry: () -> Unit, private val displayCache: () -> Unit) :
     LoadStateAdapter<FooterAdapter.ItemViewHolder>() {
-    inner class ItemViewHolder(val binding: ViewDataBinding) : RecyclerView.ViewHolder(binding.root)
-
     override fun onBindViewHolder(holder: ItemViewHolder, loadState: LoadState) {
         when (val binding = holder.binding) {
-            is ProgressRvListBinding -> {
-            }
+            is ProgressRvListBinding -> {}
+
             is RetryRvListBinding -> {
                 binding.retryBtn.setOnClickListener { retry.invoke() }
                 binding.cacheBtn.setOnClickListener {
@@ -46,4 +43,6 @@ class FooterAdapter(private val retry: () -> Unit, private val displayCache: () 
         )
         return ItemViewHolder(binding)
     }
+
+    inner class ItemViewHolder(val binding: ViewDataBinding) : RecyclerView.ViewHolder(binding.root)
 }

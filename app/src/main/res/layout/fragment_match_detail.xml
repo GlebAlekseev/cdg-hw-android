@@ -46,14 +46,14 @@
                 style="@style/DetailMaterialCardView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginHorizontal="@dimen/spacing_normal"
+                android:layout_marginHorizontal="@dimen/small_spacing"
                 app:cardPreventCornerOverlap="false">
 
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:paddingVertical="@dimen/spacing_huge">
+                    android:paddingVertical="@dimen/large_spacing">
 
                     <TextView
                         android:id="@+id/hour_minute_tv"
@@ -72,7 +72,7 @@
                         dayMonthYearAsText="@{matchDetailViewModel.state.toMatchInfo().dateUtc}"
                         android:layout_width="180dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/spacing_small"
+                        android:layout_marginTop="@dimen/extra_small_spacing"
                         android:textAlignment="center"
                         android:textAppearance="@style/TextAppearance.DetailContent.Medium"
                         app:layout_constraintEnd_toEndOf="@+id/hour_minute_tv"
@@ -152,7 +152,7 @@
                         android:id="@+id/textView8"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/spacing_huge"
+                        android:layout_marginTop="@dimen/large_spacing"
                         android:text="@{matchDetailViewModel.state.toMatchInfo().location}"
                         android:textAlignment="center"
                         android:textAppearance="@style/TextAppearance.DetailContent.Small"
@@ -169,7 +169,7 @@
                         isHome="@{true}"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/spacing_huge"
+                        android:layout_marginTop="@dimen/large_spacing"
                         android:minHeight="260dp"
                         app:cardBackgroundColor="?attr/colorAccent"
                         app:layout_constraintEnd_toStartOf="@+id/day_month_year_tv"

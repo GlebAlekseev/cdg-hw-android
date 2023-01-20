@@ -23,20 +23,11 @@ import javax.inject.Inject
 class ListMatchesViewModel @Inject constructor(
     private val matchInfoUseCase: MatchInfoUseCase
 ) : ViewModel() {
-    private val _layoutManagerState =
-        MutableStateFlow<LayoutManagerState>(LayoutManagerState.ViewTypeList)
     val layoutManagerState: StateFlow<LayoutManagerState>
         get() = _layoutManagerState
-
-    private val _listMatchesState =
-        MutableStateFlow<ListMatchesState>(ListMatchesState.Start)
     val listMatchesState: StateFlow<ListMatchesState>
         get() = _listMatchesState
-
-
     val userIntent = Channel<ListMatchesIntent>(Channel.UNLIMITED)
-
-    private lateinit var dataSource: ListMatchesDataSource
     val pagingListMatches = Pager(
         PagingConfig(
             pageSize = MatchInfoRepository.TOTAL_PER_PAGE,
@@ -49,6 +40,11 @@ class ListMatchesViewModel @Inject constructor(
         ListMatchesDataSource(matchInfoUseCase).also { dataSource = it }
     }.flow.cachedIn(viewModelScope)
 
+    private val _layoutManagerState =
+        MutableStateFlow<LayoutManagerState>(LayoutManagerState.ViewTypeList)
+    private val _listMatchesState =
+        MutableStateFlow<ListMatchesState>(ListMatchesState.Start)
+    private lateinit var dataSource: ListMatchesDataSource
 
     init {
         handleIntent()

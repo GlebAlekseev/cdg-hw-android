@@ -13,9 +13,9 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/spacing_tiny"
+        android:layout_margin="@dimen/tiny_spacing"
         app:cardBackgroundColor="?attr/colorSecondary"
-        app:cardCornerRadius="@dimen/corner_radius_normal">
+        app:cardCornerRadius="@dimen/normal_corner_radius">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -54,7 +54,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
 
-                android:paddingHorizontal="@dimen/spacing_small"
+                android:paddingHorizontal="@dimen/extra_small_spacing"
                 android:text="@{match.homeTeam}"
                 android:textAlignment="center"
                 android:textAppearance="@style/TextAppearance.ListItem.Medium"
@@ -67,7 +67,7 @@
                 android:id="@+id/textView6"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/spacing_small"
+                android:paddingHorizontal="@dimen/extra_small_spacing"
                 android:text="@{match.awayTeam}"
                 android:textAlignment="center"
                 android:textAppearance="@style/TextAppearance.ListItem.Medium"

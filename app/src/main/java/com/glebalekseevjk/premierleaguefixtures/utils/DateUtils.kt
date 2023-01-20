@@ -1,13 +1,10 @@
 package com.glebalekseevjk.premierleaguefixtures.utils
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import java.text.SimpleDateFormat
 
-
-fun parseAndGetDate(date: String, inputPatter: String, outputPatter: String): String {
-    val parseFormatter = DateTimeFormatter.ofPattern(inputPatter)
-    val localDateTime = LocalDateTime.parse(date, parseFormatter)
-    val formatter = DateTimeFormatter.ofPattern(outputPatter)
-    return localDateTime.format(formatter)
+fun parseAndGetDate(date: String, inputPattern: String, outputPattern: String): String {
+    val parseFormat = SimpleDateFormat(inputPattern)
+    val parseDate = parseFormat.parse(date)
+    val formatter = SimpleDateFormat(outputPattern)
+    return formatter.format(parseDate)
 }
-

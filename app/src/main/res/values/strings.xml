@@ -13,4 +13,6 @@
     <string name="cache_text">Показать кеш</string>
     <string name="error_text">Ошибка</string>
     <string name="use_cache_text">Использовать кеш</string>
+    <string name="match_round_text">Матч %d Раунд %d</string>
+    <string name="score_status_text">"%d : %d\nЗавершено"</string>
 </resources>

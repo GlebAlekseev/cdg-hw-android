@@ -28,14 +28,13 @@ import javax.inject.Inject
 
 
 class ListMatchesFragment : Fragment() {
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
     private var _binding: FragmentListMatchesBinding? = null
     private val binding: FragmentListMatchesBinding
         get() = _binding ?: throw RuntimeException("FragmentListMatchesBinding is null")
-
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
     private lateinit var listMatchesViewModel: ListMatchesViewModel
-
     private lateinit var matchListAdapter: MatchListAdapter
     private val navController: NavController by lazy { findNavController() }
 
@@ -96,20 +95,20 @@ class ListMatchesFragment : Fragment() {
             spanCount = 2
             spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                 override fun getSpanSize(position: Int): Int {
-                    return if (position == matchListAdapter.itemCount && footerAdapter.itemCount > 0) 2 else
-                        when (matchListAdapter.getItemViewType(position)) {
-                            MatchListAdapter.VIEW_TYPE_GRID -> 1
-                            else -> 2
-                        }
+                    return if (position == matchListAdapter.itemCount && footerAdapter.itemCount > 0) 2
+                    else when (matchListAdapter.getItemViewType(position)) {
+                        MatchListAdapter.VIEW_TYPE_GRID -> 1
+                        else -> 2
+                    }
                 }
             }
         }
         matchListAdapter.openMatchDetailClickListener = { matchNumber ->
             navigateToMatchDetailFragment(matchNumber)
         }
-        matchListAdapter.addLoadStateListener {
+        matchListAdapter.addLoadStateListener { combinedLoadStates ->
             lifecycleScope.launch {
-                when (it.refresh) {
+                when (combinedLoadStates.refresh) {
                     is LoadState.NotLoading -> {
                         listMatchesViewModel.userIntent.send(ListMatchesIntent.SetIdleState)
                     }
@@ -134,12 +133,13 @@ class ListMatchesFragment : Fragment() {
             when (menuItem.itemId) {
                 R.id.menu_change_view_type -> {
                     lifecycleScope.launch {
-                        listMatchesViewModel.userIntent.send(ListMatchesIntent.ToggleLayoutManagerState { drawable ->
-                            menuItem.icon = AppCompatResources.getDrawable(
-                                requireContext(),
-                                drawable
-                            )
-                        })
+                        listMatchesViewModel.userIntent
+                            .send(ListMatchesIntent.ToggleLayoutManagerState { drawable ->
+                                menuItem.icon = AppCompatResources.getDrawable(
+                                    requireContext(),
+                                    drawable
+                                )
+                            })
                     }
                     true
                 }
@@ -159,8 +159,8 @@ class ListMatchesFragment : Fragment() {
             }
         }
         lifecycleScope.launch {
-            listMatchesViewModel.layoutManagerState.collect {
-                when (it) {
+            listMatchesViewModel.layoutManagerState.collect { layoutManagerState ->
+                when (layoutManagerState) {
                     LayoutManagerState.ViewTypeGrid -> {
                         binding.matchListRv.post {
                             matchListAdapter.viewType =

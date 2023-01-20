@@ -35,14 +35,13 @@ import javax.inject.Inject
 
 
 class SearchListMatchesFragment : Fragment() {
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
     private var _binding: FragmentSearchListMatchesBinding? = null
     private val binding: FragmentSearchListMatchesBinding
         get() = _binding ?: throw RuntimeException("FragmentSearchListMatchesBinding is null")
-
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
     private lateinit var searchListMatchesViewModel: SearchListMatchesViewModel
-
     private lateinit var matchListAdapter: MatchListAdapter
     private val navController: NavController by lazy { findNavController() }
 
@@ -108,24 +107,31 @@ class SearchListMatchesFragment : Fragment() {
         matchListAdapter.openMatchDetailClickListener = { matchNumber ->
             navigateToMatchDetailFragment(matchNumber)
         }
-        matchListAdapter.addLoadStateListener {
+        matchListAdapter.addLoadStateListener { combinedLoadState ->
             lifecycleScope.launch {
-                when (it.refresh) {
+                when (combinedLoadState.refresh) {
                     is LoadState.NotLoading -> {
                         if (matchListAdapter.itemCount == 0) {
-                            searchListMatchesViewModel.userIntent.send(SearchListMatchesIntent.SetNotFoundState)
+                            searchListMatchesViewModel.userIntent
+                                .send(SearchListMatchesIntent.SetNotFoundState)
                         } else {
-                            searchListMatchesViewModel.userIntent.send(SearchListMatchesIntent.SetIdleState)
+                            searchListMatchesViewModel.userIntent
+                                .send(SearchListMatchesIntent.SetIdleState)
                         }
                     }
+
                     is LoadState.Loading -> {
-                        searchListMatchesViewModel.userIntent.send(SearchListMatchesIntent.SetLoading)
+                        searchListMatchesViewModel.userIntent
+                            .send(SearchListMatchesIntent.SetLoading)
                     }
+
                     is LoadState.Error -> {
                         if (matchListAdapter.itemCount == 0) {
-                            searchListMatchesViewModel.userIntent.send(SearchListMatchesIntent.SetNotFoundState)
+                            searchListMatchesViewModel.userIntent
+                                .send(SearchListMatchesIntent.SetNotFoundState)
                         } else {
-                            searchListMatchesViewModel.userIntent.send(SearchListMatchesIntent.SetIdleState)
+                            searchListMatchesViewModel.userIntent
+                                .send(SearchListMatchesIntent.SetIdleState)
                         }
                     }
                 }
@@ -189,7 +195,8 @@ class SearchListMatchesFragment : Fragment() {
             when (menuItem.itemId) {
                 R.id.menu_change_view_type -> {
                     lifecycleScope.launch {
-                        searchListMatchesViewModel.userIntent.send(SearchListMatchesIntent.ToggleLayoutManagerState { drawable ->
+                        searchListMatchesViewModel.userIntent
+                            .send(SearchListMatchesIntent.ToggleLayoutManagerState { drawable ->
                             menuItem.icon = AppCompatResources.getDrawable(
                                 requireContext(),
                                 drawable
@@ -198,6 +205,7 @@ class SearchListMatchesFragment : Fragment() {
                     }
                     true
                 }
+
                 R.id.menu_search -> {
                     true
                 }
@@ -219,8 +227,8 @@ class SearchListMatchesFragment : Fragment() {
             }
         }
         lifecycleScope.launch {
-            searchListMatchesViewModel.layoutManagerState.collect {
-                when (it) {
+            searchListMatchesViewModel.layoutManagerState.collect { layoutManagerState ->
+                when (layoutManagerState) {
                     LayoutManagerState.ViewTypeGrid -> {
                         binding.matchListRv.post {
                             matchListAdapter.viewType =
@@ -231,6 +239,7 @@ class SearchListMatchesFragment : Fragment() {
                             )
                         }
                     }
+
                     LayoutManagerState.ViewTypeList -> {
                         binding.matchListRv.post {
                             matchListAdapter.viewType =

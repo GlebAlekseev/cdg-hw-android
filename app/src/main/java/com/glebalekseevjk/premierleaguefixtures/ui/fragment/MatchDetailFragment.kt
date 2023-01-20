@@ -22,14 +22,13 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class MatchDetailFragment : Fragment() {
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
     private var _binding: FragmentMatchDetailBinding? = null
     private val binding: FragmentMatchDetailBinding
         get() = _binding ?: throw RuntimeException("FragmentMatchDetailBinding is null")
-
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
     private lateinit var matchDetailViewModel: MatchDetailViewModel
-
     private val navController: NavController by lazy { findNavController() }
     private val args: MatchDetailFragmentArgs by navArgs()
 
@@ -84,15 +83,16 @@ class MatchDetailFragment : Fragment() {
 
     private fun observeViewModel() {
         lifecycleScope.launch {
-            matchDetailViewModel.state.collect {
-                when (it) {
+            matchDetailViewModel.state.collect { matchDetailState ->
+                when (matchDetailState) {
                     is MatchDetailState.Error<*> -> {
                         Toast.makeText(
                             requireContext(),
-                            getString(it.errorMessage as? Int ?: R.string.error_text),
+                            getString(matchDetailState.errorMessage as? Int ?: R.string.error_text),
                             Toast.LENGTH_SHORT
                         ).show()
                     }
+
                     else -> {}
                 }
             }

@@ -19,10 +19,6 @@
         <action
             android:id="@+id/action_listMatchesFragment_to_searchListMatchesFragment"
             app:destination="@id/searchListMatchesFragment"
-            app:enterAnim="@anim/fade_in"
-            app:exitAnim="@anim/fade_out"
-            app:popEnterAnim="@anim/fade_in"
-            app:popExitAnim="@anim/fade_out"
             app:popUpTo="@id/listMatchesFragment" />
     </fragment>
     <fragment

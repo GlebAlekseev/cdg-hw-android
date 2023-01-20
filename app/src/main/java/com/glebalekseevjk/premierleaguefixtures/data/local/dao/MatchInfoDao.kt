@@ -12,7 +12,8 @@ interface MatchInfoDao {
     @Query("SELECT * FROM MatchInfoDbModel LIMIT :limit OFFSET :offset")
     suspend fun getPagedMatchInfoList(limit: Int, offset: Int): List<MatchInfoDbModel>
 
-    @Query("SELECT * FROM MatchInfoDbModel WHERE HomeTeam || AwayTeam LIKE '%' || :requestText  || '%' LIMIT :limit OFFSET :offset")
+    @Query("SELECT * FROM MatchInfoDbModel WHERE HomeTeam || AwayTeam " +
+            "LIKE '%' || :requestText  || '%' LIMIT :limit OFFSET :offset")
     suspend fun searchTeamNamePagedMatchInfoList(
         limit: Int,
         offset: Int,
