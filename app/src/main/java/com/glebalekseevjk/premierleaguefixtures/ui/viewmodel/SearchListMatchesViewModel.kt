@@ -8,13 +8,9 @@ import androidx.paging.cachedIn
 import com.glebalekseevjk.premierleaguefixtures.R
 import com.glebalekseevjk.premierleaguefixtures.domain.interactor.MatchInfoUseCase
 import com.glebalekseevjk.premierleaguefixtures.domain.repository.MatchInfoRepository
-import com.glebalekseevjk.premierleaguefixtures.ui.paging.ListMatchesDataSource
 import com.glebalekseevjk.premierleaguefixtures.ui.paging.SearchListMatchesDataSource
-import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.intent.ListMatchesIntent
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.intent.SearchListMatchesIntent
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.LayoutManagerState
-import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.ListMatchesState
-import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.MatchDetailState
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.SearchListMatchesState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,22 +22,13 @@ import javax.inject.Inject
 class SearchListMatchesViewModel @Inject constructor(
     private val matchInfoUseCase: MatchInfoUseCase
 ) : ViewModel() {
-    private val _layoutManagerState =
-        MutableStateFlow<LayoutManagerState>(LayoutManagerState.ViewTypeList)
     val layoutManagerState: StateFlow<LayoutManagerState>
         get() = _layoutManagerState
-
-    private val _searchListMatchesState =
-        MutableStateFlow<SearchListMatchesState>(SearchListMatchesState.Start)
     val searchListMatchesState: StateFlow<SearchListMatchesState>
         get() = _searchListMatchesState
-
-    private val _teamName = MutableStateFlow("")
     val teamName: StateFlow<String>
         get() = _teamName
-
     val userIntent = Channel<SearchListMatchesIntent>(Channel.UNLIMITED)
-
     val pagingListMatches = Pager(
         PagingConfig(
             pageSize = MatchInfoRepository.TOTAL_PER_PAGE,
@@ -50,6 +37,12 @@ class SearchListMatchesViewModel @Inject constructor(
     ) {
         SearchListMatchesDataSource(matchInfoUseCase, teamName.value)
     }.flow.cachedIn(viewModelScope)
+
+    private val _searchListMatchesState =
+        MutableStateFlow<SearchListMatchesState>(SearchListMatchesState.Start)
+    private val _teamName = MutableStateFlow("")
+    private val _layoutManagerState =
+        MutableStateFlow<LayoutManagerState>(LayoutManagerState.ViewTypeList)
 
     init {
         handleIntent()
@@ -88,15 +81,15 @@ class SearchListMatchesViewModel @Inject constructor(
         _teamName.value = teamName
     }
 
-    private fun setLoading() {
-        _searchListMatchesState.value = SearchListMatchesState.Loading
-    }
-
     private fun setIdle() {
         _searchListMatchesState.value = SearchListMatchesState.Idle
     }
 
     private fun setNotFound() {
         _searchListMatchesState.value = SearchListMatchesState.NotFound
+    }
+
+    private fun setLoading() {
+        _searchListMatchesState.value = SearchListMatchesState.Loading
     }
 }

@@ -33,9 +33,9 @@ class MatchInfoRepositoryImpl @Inject constructor(
     ): Resource<List<MatchInfo>> = with(Dispatchers.IO) {
         Resource.Success(
             matchInfoDao.searchTeamNamePagedMatchInfoList(
-                TOTAL_PER_PAGE,
-                page * TOTAL_PER_PAGE - TOTAL_PER_PAGE,
-                teamName
+                limit = TOTAL_PER_PAGE,
+                offset = page * TOTAL_PER_PAGE - TOTAL_PER_PAGE,
+                requestText = teamName
             ).map { mapper.mapDbModelToItem(it) }
         )
     }
@@ -43,8 +43,8 @@ class MatchInfoRepositoryImpl @Inject constructor(
     override suspend fun getMatchListRangeForPageLocal(page: Int): Resource<List<MatchInfo>> =
         with(Dispatchers.IO) {
             return@with Resource.Success(matchInfoDao.getPagedMatchInfoList(
-                TOTAL_PER_PAGE,
-                page * TOTAL_PER_PAGE - TOTAL_PER_PAGE
+                limit = TOTAL_PER_PAGE,
+                offset = page * TOTAL_PER_PAGE - TOTAL_PER_PAGE
             ).map { mapper.mapDbModelToItem(it) })
         }
 
@@ -81,7 +81,9 @@ class MatchInfoRepositoryImpl @Inject constructor(
         }
 
 
-    private fun getResultFromMatchInfoListResponse(response: Response<List<MatchInfo>>): Resource<List<MatchInfo>> {
+    private fun getResultFromMatchInfoListResponse(
+        response: Response<List<MatchInfo>>
+    ): Resource<List<MatchInfo>> {
         response.code().let {
             when (it) {
                 200 -> {}

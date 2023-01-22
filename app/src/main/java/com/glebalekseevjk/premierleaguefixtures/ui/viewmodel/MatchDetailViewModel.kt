@@ -14,9 +14,10 @@ import javax.inject.Inject
 class MatchDetailViewModel @Inject constructor(
     private val matchInfoUseCase: MatchInfoUseCase
 ) : ViewModel() {
-    private val _state = MutableStateFlow<MatchDetailState>(MatchDetailState.Loading)
     val state: StateFlow<MatchDetailState>
         get() = _state
+
+    private val _state = MutableStateFlow<MatchDetailState>(MatchDetailState.Loading)
 
     fun setCurrentMatchInfo(matchNumber: Int) {
         viewModelScope.launch {

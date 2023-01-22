@@ -1,75 +1,80 @@
 package com.glebalekseevjk.premierleaguefixtures.ui
 
 import android.widget.TextView
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.databinding.BindingAdapter
 import com.glebalekseevjk.premierleaguefixtures.R
 import com.glebalekseevjk.premierleaguefixtures.utils.parseAndGetDate
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.card.MaterialCardView
 
-@BindingAdapter(value = ["homeTeamScore", "awayTeamScore", "isHome"], requireAll = true)
-fun TextView.teamScore(homeTeamScore: Int, awayTeamScore: Int, isHome: Boolean) {
-    if (isHome) {
-        this.text = homeTeamScore.toString()
-    } else {
-        this.text = awayTeamScore.toString()
+object BindingAdapters {
+    @BindingAdapter(value = ["homeTeamScore", "awayTeamScore", "isHome"], requireAll = true)
+    @JvmStatic
+    fun TextView.setTeamScore(homeTeamScore: Int, awayTeamScore: Int, isHome: Boolean) {
+        this.text = if (isHome) homeTeamScore.toString() else awayTeamScore.toString()
     }
-}
 
-@BindingAdapter(value = ["homeTeamScore", "awayTeamScore", "isHome"], requireAll = true)
-fun MaterialCardView.teamScore(homeTeamScore: Int, awayTeamScore: Int, isHome: Boolean) {
-    if (isHome) {
-        if (homeTeamScore > awayTeamScore) {
-            this.setCardBackgroundColor(resources.getColor(R.color.green))
-        } else if (homeTeamScore == awayTeamScore) {
-            this.setCardBackgroundColor(resources.getColor(R.color.yellow))
-        } else {
-            this.setCardBackgroundColor(resources.getColor(R.color.red))
-        }
-    } else {
-        if (awayTeamScore > homeTeamScore) {
-            this.setCardBackgroundColor(resources.getColor(R.color.green))
-        } else if (awayTeamScore == homeTeamScore) {
-            this.setCardBackgroundColor(resources.getColor(R.color.yellow))
-        } else {
-            this.setCardBackgroundColor(resources.getColor(R.color.red))
-        }
+    @BindingAdapter(value = ["homeTeamScore", "awayTeamScore", "isHome"], requireAll = true)
+    @JvmStatic
+    fun MaterialCardView.setTeamScoreBackground(
+        homeTeamScore: Int,
+        awayTeamScore: Int,
+        isHome: Boolean
+    ) {
+        val score = if (isHome) homeTeamScore else awayTeamScore
+        val opponentScore = if (isHome) awayTeamScore else homeTeamScore
+
+        this.setCardBackgroundColor(
+            when {
+                score > opponentScore -> AppCompatResources.getColorStateList(
+                    context,
+                    R.color.green
+                )
+                score == opponentScore -> AppCompatResources.getColorStateList(
+                    context,
+                    R.color.yellow
+                )
+                else -> AppCompatResources.getColorStateList(context, R.color.red)
+            }
+        )
     }
-}
 
-@BindingAdapter(value = ["homeTeamScore", "awayTeamScore"], requireAll = true)
-fun TextView.teamScoreInline(homeTeamScore: Int, awayTeamScore: Int) {
-    val text = "$homeTeamScore : $awayTeamScore\nЗавершено"
-    this.text = text
-}
+    @BindingAdapter(value = ["homeTeamScore", "awayTeamScore"], requireAll = true)
+    @JvmStatic
+    fun TextView.setTeamScoreInline(homeTeamScore: Int, awayTeamScore: Int) {
+        this.text = resources.getString(R.string.score_status_text, homeTeamScore, awayTeamScore)
+    }
 
-@BindingAdapter("hourMinuteAsText")
-fun TextView.hourMinuteAsText(date: String) {
-    val resultText = parseAndGetDate(
-        date = date.substring(0, date.length - 1),
-        inputPatter = "yyyy-MM-dd HH:mm:ss",
-        outputPatter = "HH:mm"
-    )
-    this.text = resultText
-}
+    @BindingAdapter("hourMinuteAsText")
+    @JvmStatic
+    fun TextView.setHourMinuteAsText(date: String) {
+        this.text = parseAndGetDate(
+            date = date.substring(0, date.length - 1),
+            inputPattern = "yyyy-MM-dd HH:mm:ss",
+            outputPattern = "HH:mm"
+        )
+    }
 
-@BindingAdapter("dayMonthYearAsText")
-fun TextView.dayMonthYearAsText(date: String) {
-    val resultText = parseAndGetDate(
-        date = date.substring(0, date.length - 1),
-        inputPatter = "yyyy-MM-dd HH:mm:ss",
-        outputPatter = "EEEE, dd MMMM uuuu"
-    )
-    this.text = resultText.capitalize()
-}
+    @BindingAdapter("dayMonthYearAsText")
+    @JvmStatic
+    fun TextView.setDayMonthYearAsText(date: String) {
+        this.text = parseAndGetDate(
+            date = date.substring(0, date.length - 1),
+            inputPattern = "yyyy-MM-dd HH:mm:ss",
+            outputPattern = "EEEE, dd MMMM uu"
+        ).replaceFirstChar { it.uppercaseChar() }
+    }
 
-@BindingAdapter(value = ["matchNumber", "roundNumber"], requireAll = true)
-fun TextView.matchAndRoundNumber(matchNumber: Int, roundNumber: Int) {
-    val text = "Матч $matchNumber Раунд $roundNumber"
-    this.text = text
-}
+    @BindingAdapter(value = ["matchNumber", "roundNumber"], requireAll = true)
+    @JvmStatic
+    fun TextView.setMatchAndRoundNumber(matchNumber: Int, roundNumber: Int) {
+        this.text = resources.getString(R.string.match_round_text, matchNumber, roundNumber)
+    }
 
-@BindingAdapter(value = ["matchNumber", "roundNumber"], requireAll = true)
-fun MaterialToolbar.matchAndRoundNumber(matchNumber: Int, roundNumber: Int) {
-    this.title = "Матч $matchNumber Раунд $roundNumber"
+    @BindingAdapter(value = ["matchNumber", "roundNumber"], requireAll = true)
+    @JvmStatic
+    fun MaterialToolbar.setMatchAndRoundNumber(matchNumber: Int, roundNumber: Int) {
+        this.title = resources.getString(R.string.match_round_text, matchNumber, roundNumber)
+    }
 }

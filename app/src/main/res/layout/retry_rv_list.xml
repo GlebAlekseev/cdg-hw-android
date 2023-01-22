@@ -7,8 +7,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorOnPrimary"
-        android:padding="@dimen/spacing_normal"
-        android:paddingVertical="@dimen/spacing_normal">
+        android:padding="@dimen/small_spacing"
+        android:paddingVertical="@dimen/small_spacing">
 
         <TextView
             android:id="@+id/textView9"

@@ -18,9 +18,9 @@ class SearchListMatchesDataSource @Inject constructor(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, MatchInfo> {
         val nextPageNumber = params.key ?: STARTING_PAGE_INDEX
         val response = matchInfoUseCase.searchTeamNamePagedMatchInfoList(teamName, nextPageNumber)
-
         return when (response) {
             is Resource.Failure -> LoadResult.Error(response.throwable)
+
             is Resource.Success -> {
                 val isLast = response.data.size < MatchInfoRepository.TOTAL_PER_PAGE
                 LoadResult.Page(

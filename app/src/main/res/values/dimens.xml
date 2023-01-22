@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="spacing_mega">128dp</dimen>
-    <dimen name="spacing_huge">40dp</dimen>
-    <dimen name="spacing_large">24dp</dimen>
-    <dimen name="spacing_normal">16dp</dimen>
-    <dimen name="spacing_small">8dp</dimen>
-    <dimen name="spacing_tiny">4dp</dimen>
+    <dimen name="extra_large_spacing">128dp</dimen>
+    <dimen name="large_spacing">40dp</dimen>
+    <dimen name="medium_spacing">24dp</dimen>
+    <dimen name="small_spacing">16dp</dimen>
+    <dimen name="extra_small_spacing">8dp</dimen>
+    <dimen name="tiny_spacing">4dp</dimen>
 
-    <dimen name="corner_radius_normal">16dp</dimen>
-    <dimen name="corner_radius_small">8dp</dimen>
+    <dimen name="normal_corner_radius">16dp</dimen>
+    <dimen name="small_corner_radius">8dp</dimen>
 
-    <dimen name="elevation_normal">16dp</dimen>
-    <dimen name="elevation_small">8dp</dimen>
+    <dimen name="normal_elevation">16dp</dimen>
+    <dimen name="small_elevation">8dp</dimen>
     <dimen name="zero">0dp</dimen>
 </resources>
