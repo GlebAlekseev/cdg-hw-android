@@ -12,7 +12,6 @@ import com.glebalekseevjk.premierleaguefixtures.ui.paging.ListMatchesDataSource
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.intent.ListMatchesIntent
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.LayoutManagerState
 import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.ListMatchesState
-import com.glebalekseevjk.premierleaguefixtures.ui.viewmodel.state.MatchDetailState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,6 +39,12 @@ class ListMatchesViewModel @Inject constructor(
         ListMatchesDataSource(matchInfoUseCase).also { dataSource = it }
     }.flow.cachedIn(viewModelScope)
 
+    var pagingCacheMode: Boolean
+        get() = dataSource.isLocal
+        private set(value) {
+            dataSource.isLocal = value
+        }
+
     private val _layoutManagerState =
         MutableStateFlow<LayoutManagerState>(LayoutManagerState.ViewTypeList)
     private val _listMatchesState =
@@ -55,7 +60,7 @@ class ListMatchesViewModel @Inject constructor(
             userIntent.consumeAsFlow().collect {
                 when (it) {
                     is ListMatchesIntent.ToggleLayoutManagerState -> toggleLayoutManagerState(it.callback)
-                    is ListMatchesIntent.EnableCacheMode -> enableCacheMode()
+                    is ListMatchesIntent.EnableCacheMode -> pagingCacheMode = true
                     is ListMatchesIntent.SetIdleState -> setIdle()
                     is ListMatchesIntent.SetNotFoundState -> setNotFound()
                 }
@@ -76,11 +81,7 @@ class ListMatchesViewModel @Inject constructor(
         }
     }
 
-    private fun enableCacheMode() {
-        dataSource.isLocal = true
-    }
-
-    private fun setIdle() {
+    fun setIdle() {
         _listMatchesState.value = ListMatchesState.Idle
     }
 
