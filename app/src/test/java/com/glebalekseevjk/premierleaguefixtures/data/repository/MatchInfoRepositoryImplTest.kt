@@ -36,12 +36,6 @@ class MatchInfoRepositoryImplTest {
     fun setUp() {
         MockKAnnotations.init(this)
 
-//        every { matchInfoDao.getPagedMatchInfoList() }
-//        every { matchInfoDao.addAll() }
-//        every { matchInfoDao.searchTeamNamePagedMatchInfoList() }
-//
-//        every { matchInfoService.getTodoList() }
-
         matchInfoRepositoryImpl = MatchInfoRepositoryImpl(
             matchInfoService = matchInfoService,
             matchInfoDao = matchInfoDao,
@@ -115,46 +109,60 @@ class MatchInfoRepositoryImplTest {
     }
 
     @Test
-    fun getMatchListRangeForPageRemote() = runTest {
-        coEvery { matchInfoDao.addAll(any(), any()) } just runs
-        val mockResponse = mockk<Response<List<MatchInfo>>>()
-//        every { mockResponse.code() } returns 200
-        every { mockResponse.code() } returns 500
-        every { mockResponse.message() } returns "fake message"
-//        every { mockResponse.body() } returns listOf()
-//        every { mockResponse.body() } returns null
-        coEvery { matchInfoService.getTodoList() } returns mockResponse
-        matchInfoRepositoryImpl = MatchInfoRepositoryImpl(
-            matchInfoService = matchInfoService,
-            matchInfoDao = matchInfoDao,
-            mapper = mapperImpl
-        )
+    fun `get match list range for page remote should return ResourceFailure with HttpException`() =
+        runTest {
+            coEvery { matchInfoDao.addAll(any(), any()) } just runs
+            val mockResponse = mockk<Response<List<MatchInfo>>>()
+            every { mockResponse.code() } returns 500
+            every { mockResponse.message() } returns "fake message"
+            coEvery { matchInfoService.getTodoList() } returns mockResponse
+            matchInfoRepositoryImpl = MatchInfoRepositoryImpl(
+                matchInfoService = matchInfoService,
+                matchInfoDao = matchInfoDao,
+                mapper = mapperImpl
+            )
 
-        val result = matchInfoRepositoryImpl.getMatchListRangeForPageRemote(99)
+            val result = matchInfoRepositoryImpl.getMatchListRangeForPageRemote(99)
 
-        assertTrue(result is Resource.Failure && result.throwable::class.java == HttpException::class.java )
-    }
+            assertTrue(result is Resource.Failure && result.throwable::class.java == HttpException::class.java)
+        }
 
 
     @Test
-    fun getMatchListRangeForPageRemote2() = runTest {
-        coEvery { matchInfoDao.addAll(any(), any()) } just runs
-        val mockResponse = mockk<Response<List<MatchInfo>>>()
-//        every { mockResponse.code() } returns 200
-        every { mockResponse.code() } returns 200
-//        every { mockResponse.message() } returns "fake message"
-//        every { mockResponse.body() } returns listOf()
-        every { mockResponse.body() } returns null
-        coEvery { matchInfoService.getTodoList() } returns mockResponse
-        matchInfoRepositoryImpl = MatchInfoRepositoryImpl(
-            matchInfoService = matchInfoService,
-            matchInfoDao = matchInfoDao,
-            mapper = mapperImpl
-        )
+    fun `get match list range for page remote should return ResourceFailure with NullPointerException`() =
+        runTest {
+            coEvery { matchInfoDao.addAll(any(), any()) } just runs
+            val mockResponse = mockk<Response<List<MatchInfo>>>()
+            every { mockResponse.code() } returns 200
+            every { mockResponse.body() } returns null
+            coEvery { matchInfoService.getTodoList() } returns mockResponse
+            matchInfoRepositoryImpl = MatchInfoRepositoryImpl(
+                matchInfoService = matchInfoService,
+                matchInfoDao = matchInfoDao,
+                mapper = mapperImpl
+            )
 
-        val result = matchInfoRepositoryImpl.getMatchListRangeForPageRemote(99)
+            val result = matchInfoRepositoryImpl.getMatchListRangeForPageRemote(99)
 
-        assertTrue(result is Resource.Failure && result.throwable::class.java == NullPointerException::class.java )
-    }
+            assertTrue(result is Resource.Failure && result.throwable::class.java == NullPointerException::class.java)
+        }
 
+    @Test
+    fun `get match list range for page remote should return ResourceSuccess with empty list`() =
+        runTest {
+            coEvery { matchInfoDao.addAll(*anyVararg()) } just runs
+            val mockResponse = mockk<Response<List<MatchInfo>>>()
+            every { mockResponse.code() } returns 200
+            every { mockResponse.body() } returns emptyList()
+            coEvery { matchInfoService.getTodoList() } returns mockResponse
+            matchInfoRepositoryImpl = MatchInfoRepositoryImpl(
+                matchInfoService = matchInfoService,
+                matchInfoDao = matchInfoDao,
+                mapper = mapperImpl
+            )
+
+            val result = matchInfoRepositoryImpl.getMatchListRangeForPageRemote(99)
+
+            assertEquals(result, Resource.Success(emptyList<MatchInfo>()))
+        }
 }

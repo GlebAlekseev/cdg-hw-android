@@ -101,9 +101,10 @@ class MatchInfoRepositoryImpl @Inject constructor(
     }
 
     private fun <T> getRangeListForPage(list: List<T>, page: Int): List<T> {
-        val start = TOTAL_PER_PAGE * page - TOTAL_PER_PAGE
+        var start = TOTAL_PER_PAGE * page - TOTAL_PER_PAGE
         var end = TOTAL_PER_PAGE * page - 1
         if (end >= list.size) end = list.size - 1
+        if (end + 1 < start) start = end + 1
         return list.subList(start, end + 1)
     }
 }
